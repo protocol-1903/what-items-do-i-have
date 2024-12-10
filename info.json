@@ -1,0 +1,12 @@
+{
+  "name": "what-items-do-i-have",
+  "version": "1.0.0",
+  "title": "What Items Do I Have?",
+  "author": "protocol_1903",
+  "homepage": "https://github.com/NotACliche/what-items-do-i-have",
+  "description": "Press Alt + Z over anything to see how many you have in your logistics network, and of what quality.\nRequested on the forums by Tinyboss",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base"
+  ]
+}
