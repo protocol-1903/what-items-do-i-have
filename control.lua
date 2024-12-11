@@ -59,8 +59,8 @@ script.on_event("widih-search-network", function(event)
   window.visible = true
   window.bring_to_front()
 
-  item = prototype.type == "item" and prototype.name or
-    prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
+  item = prototype.base_type == "item" and prototype.name or
+  prototype.base_type == "entity" and prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
 
   if not item then
     -- invalid entity/no item found
