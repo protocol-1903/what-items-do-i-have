@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2024-12-17
+  Features:
+    - Network search from map view (including on other surfaces)
+  Bugfixes:
+    - Fixed an issue where having personal logistics disabled would always return an invalid network
+---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2024-12-11
   Bugfixes:

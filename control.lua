@@ -62,12 +62,15 @@ script.on_event("widih-search-network", function(event)
   item = prototype.base_type == "item" and prototype.name or
   prototype.base_type == "entity" and prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
 
+  -- find network of player (or, the position of the map view)
+  local network = player.force.find_logistic_network_by_position(player.position, player.surface)
+
   if not item then
     -- invalid entity/no item found
     window["widih-error-no-network"].visible = false
     window["widih-error-bad-entity"].visible = true
     window["widih-content-table"].visible = false
-  elseif player.get_requester_point() ~= nil and player.get_requester_point().logistic_network.valid then
+  elseif network then
     -- proper logistic network has been found
     window["widih-error-no-network"].visible = false
     window["widih-error-bad-entity"].visible = false
@@ -75,8 +78,6 @@ script.on_event("widih-search-network", function(event)
 
     -- reset table
     window["widih-content-table"].clear()
-
-    network = player.get_requester_point().logistic_network
 
     -- find quality items in network
     local items = {}
