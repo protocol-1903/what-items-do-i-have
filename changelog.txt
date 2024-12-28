@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2024-12-28
+  Features:
+    - New keybind and shortcut for auto-updating the window when the item in the cursor changes
+  Changes:
+    - When the window is closed, resets the location to the upper left corner when it is opened again
+---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2024-12-17
   Features:
