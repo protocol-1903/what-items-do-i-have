@@ -119,7 +119,7 @@ script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
   if not game.get_player(event.player_index).is_cursor_empty() and game.get_player(event.player_index).is_shortcut_toggled("widih-update-hand") then
     player = game.get_player(event.player_index)
     window = player.gui.screen["widih-window"]
-    item = player.cursor_ghost and player.cursor_ghost.name.name or player.cursor_stack and player.cursor_stack.name
+    item = player.cursor_ghost and player.cursor_ghost.name.name or player.cursor_stack.valid_for_read and player.cursor_stack.name
   
     -- if window does not exist (i.e. player is new to game)
     if not window then
