@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.6
+Date: 2025-01-12
+  Features:
+    - Added a new hotkey and shortcut to update the window when hovering over an in-world entity
+    - If the player is not in a network, the closest network to their position is used instead.
+  Bugfixes:
+    - Fixed clicking the shortcut icons not toggling their state
+---------------------------------------------------------------------------------------------------
 Version: 1.0.5
 Date: 2025-01-04
   Bugfixes:

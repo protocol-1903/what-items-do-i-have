@@ -21,5 +21,20 @@ data:extend({
     action = "lua",
     toggleable = true,
     associated_control_input = "widih-update-hand"
+  },
+  {
+    type = "custom-input",
+    name = "widih-update-hover",
+    key_sequence = "CONTROL + ALT + Z",
+    action = "lua"
+  },
+  {
+    type = "shortcut",
+    name = "widih-update-hover",
+    icon = "__what-items-do-i-have__/info2.png",
+    small_icon = "__what-items-do-i-have__/info2.png",
+    action = "lua",
+    toggleable = true,
+    associated_control_input = "widih-update-hand"
   }
 })
