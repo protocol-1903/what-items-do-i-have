@@ -79,13 +79,14 @@ local function search(item, player)
     local items = {}
     for q, quality in pairs(prototypes.quality) do
       if q ~= "quality-unknown" then
-        window["widih-content-table"].add{ type = "sprite", sprite = "item." .. item }
+        window["widih-content-table"].add{ type = "sprite-button", sprite = "item." .. item }
         window["widih-content-table"].add{ type = "sprite", sprite = "quality." .. q }
         window["widih-content-table"].add{ type = "label", caption =
-        network.get_item_count{
-          name = item,
-          quality = quality.name
-        }}
+          network.get_item_count{
+            name = item,
+            quality = quality.name
+          }
+        }
       end
     end
   else
@@ -96,10 +97,17 @@ local function search(item, player)
   end
 end
 
--- close window when button clicked
+-- update gui events to reflect
 script.on_event(defines.events.on_gui_click, function (event)
   if event.element.name == "widih-close-button" then
     game.get_player(event.player_index).gui.screen["widih-window"].destroy()
+  else -- must be an icon button, put it in the hand
+    if game.get_player(event.player_index).clear_cursor() then
+      game.get_player(event.player_index).cursor_ghost = {
+        name = event.element.sprite:sub(6),
+        quality = event.element.parent.children[2].sprite:sub(9)
+      }
+    end
   end
 end)
 
