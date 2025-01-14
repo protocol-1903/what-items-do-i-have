@@ -101,7 +101,7 @@ end
 script.on_event(defines.events.on_gui_click, function (event)
   if event.element.name == "widih-close-button" then
     game.get_player(event.player_index).gui.screen["widih-window"].destroy()
-  else -- must be an icon button, put it in the hand
+  elseif event.element.get_mod() == "what-items-do-i-have" -- must be an icon button, put it in the hand
     if game.get_player(event.player_index).clear_cursor() then
       game.get_player(event.player_index).cursor_ghost = {
         name = event.element.sprite:sub(6),
