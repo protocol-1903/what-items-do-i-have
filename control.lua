@@ -168,12 +168,12 @@ end)
 -- update on hover
 script.on_event(defines.events.on_selected_entity_changed, function(event)
   -- only run if shortcut is enabled
-  if game.get_player(event.player_index).selected and game.get_player(event.player_index).selected.prototype and game.get_player(event.player_index).is_shortcut_toggled("widih-update-hover") then
+  if game.get_player(event.player_index).is_shortcut_toggled("widih-update-hover") and game.get_player(event.player_index).selected then
     player = game.get_player(event.player_index)
-    prototype = player.selected.prototype
+    prototype = player.selected.type == "entity-ghost" and player.selected.ghost_name or player.selected.name
 
     -- get item
-    item = prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
+    item = prototypes.entity[prototype].items_to_place_this and #prototypes.entity[prototype].items_to_place_this == 1 and prototypes.entity[prototype].items_to_place_this[1].name
 
     search(item, player)
   end

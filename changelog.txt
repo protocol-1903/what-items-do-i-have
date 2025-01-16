@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.10
+Date: 2025-01-16
+  Changes:
+    - Updated the locale for widih-update-hand to be more descriptive
+    - Added descriptions to the hotkeys
+  Bugfixes:
+    - Fixed an issues where ghost entities would not update the window when hovered over
+    - Fixed missing locale key for widih-update-hover
+---------------------------------------------------------------------------------------------------
 Version: 1.0.9
 Date: 2025-01-14
   Bugfixes:
