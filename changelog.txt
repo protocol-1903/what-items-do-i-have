@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.11
+Date: 2025-01-29
+  Bugfixes:
+    - Fixed an issue where clicking on some items in the remote view gui would not search network
+---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2025-01-16
   Changes:

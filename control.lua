@@ -147,6 +147,7 @@ script.on_event("widih-search-network", function(event)
 
   -- get item
   item = prototype.base_type == "item" and prototype.name or
+  prototype.base_type == "recipe" and prototypes.recipe[prototype.name].main_product and prototypes.recipe[prototype.name].main_product.type == "item" and prototypes.recipe[prototype.name].main_product.name or
   prototype.base_type == "entity" and prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
 
   search(item, player)
