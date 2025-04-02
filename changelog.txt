@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.12
+Date: 2025-04-02
+  Features:
+    - Quality indicators are now included on the image of the item
+    - If the player viewing a space platform, will search the platform hub instead of the player's position
+    - Option to search position of remote view, or position of physical character (only applies to remote view)
+    - Much cleaner UI that is in the Factorio style
+  Bugfixes:
+    - Fixed an issue where interacting with the buttons would not give an item of the appropriate quality
+---------------------------------------------------------------------------------------------------
 Version: 1.0.11
 Date: 2025-01-29
   Bugfixes:
