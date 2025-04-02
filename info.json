@@ -4,7 +4,7 @@
   "title": "What Items Do I Have?",
   "author": "protocol_1903",
   "homepage": "https://discord.gg/K3fXMGVc4z",
-  "description": "Press Alt + Z over anything to see how many you have in your logistics network, and of what quality.\nRequested on the forums by Tinyboss",
+  "description": "Press Alt + Z over anything to see how many you have in your logistics network, and of what quality.\nNow supports searching the space platform hub for items!\nRequested on the forums by Tinyboss",
   "factorio_version": "2.0",
   "dependencies": [
     "base"
