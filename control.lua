@@ -35,7 +35,7 @@ local function search(item, player)
       type = "label",
       name = "label",
       style = "frame_title",
-      caption = {"widih-window.frame", {"widih-network.nil"}}
+      caption = {"widih-network.nil"}
     }.drag_target = window
     window.titlebar.add{
       type = "empty-widget",
@@ -217,7 +217,9 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
 
   storage[player.index] = event.element.selected_index
 
-  search(window.main.table.children[1].elem_value.name, player)
+  if window.main.table.visible then
+    search(window.main.table.children[1].elem_value.name, player)
+  end
 end)
 
 script.on_event("widih-update-hand", function (event)
