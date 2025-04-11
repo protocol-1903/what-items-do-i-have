@@ -45,6 +45,14 @@ local function search(item, player)
     window.titlebar.space.drag_target = window
     window.titlebar.add{
       type = "sprite-button",
+      name = "pin",
+      style = "frame_action_button",
+      sprite = "widih-pin-white",
+      hovered_sprite = "widih-pin-black",
+      clicked_sprite = "widih-pin-black",
+    }
+    window.titlebar.add{
+      type = "sprite-button",
       name = "close-button",
       style = "close_button",
       sprite = "utility/close"
@@ -101,10 +109,6 @@ local function search(item, player)
       column_count = 2
     }.style.horizontal_spacing = 10
   end
-
-  -- make it visible and focus
-  window.visible = true
-  window.bring_to_front()
 
   main = window.main
 
@@ -172,6 +176,14 @@ local function search(item, player)
     main["error-bad-entity"].visible = false
     main.table.visible = false
   end
+
+  -- make it visible and focus
+  window.visible = true
+
+  if not window.titlebar.pin.toggled then
+    player.opened = window
+    window.bring_to_front()
+  end
 end
 
 -- update gui events to reflect
@@ -189,7 +201,15 @@ script.on_event(defines.events.on_gui_click, function (event)
   end
 
   if event.element.name == "close-button" then
-    player.gui.screen["widih-window"].destroy()
+    window.destroy()
+  elseif event.element.name == "pin" then
+    local pinned = not window.titlebar["pin"].toggled
+    window.titlebar["pin"].toggled = pinned
+    if pinned and player.opened == window then
+      player.opened = nil
+    elseif not pinned and not player.opened_self and not player.opened then
+      player.opened = window
+    end
   elseif event.element.type == "choose-elem-button" then -- must be an icon button, put it in the hand
     if player.clear_cursor() then
       player.cursor_ghost = {
@@ -197,8 +217,6 @@ script.on_event(defines.events.on_gui_click, function (event)
         quality = event.element.elem_value.quality
       }
     end
-  elseif event.element.tyle == "drop-down" then
-    storage[player.index] = event.element.selected_index
   end
 end)
 
@@ -219,6 +237,13 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
 
   if window.main.table.visible then
     search(window.main.table.children[1].elem_value.name, player)
+  end
+end)
+
+script.on_event(defines.events.on_gui_closed, function (event)
+  if event.element and event.element.get_mod() == "what-items-do-i-have" and
+    not event.element.titlebar.pin.toggled then
+    event.element.destroy()
   end
 end)
 

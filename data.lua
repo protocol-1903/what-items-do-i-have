@@ -16,8 +16,8 @@ data:extend({
   {
     type = "shortcut",
     name = "widih-update-hand",
-    icon = "__what-items-do-i-have__/info.png",
-    small_icon = "__what-items-do-i-have__/info.png",
+    icon = "__what-items-do-i-have__/graphics/info.png",
+    small_icon = "__what-items-do-i-have__/graphics/info.png",
     action = "lua",
     toggleable = true,
     associated_control_input = "widih-update-hand"
@@ -31,10 +31,23 @@ data:extend({
   {
     type = "shortcut",
     name = "widih-update-hover",
-    icon = "__what-items-do-i-have__/info2.png",
-    small_icon = "__what-items-do-i-have__/info2.png",
+    icon = "__what-items-do-i-have__/graphics/info2.png",
+    small_icon = "__what-items-do-i-have__/graphics/info2.png",
     action = "lua",
     toggleable = true,
     associated_control_input = "widih-update-hand"
+  },
+  {
+    type = "sprite",
+    name = "widih-pin-white",
+    filename = "__what-items-do-i-have__/graphics/pin.png",
+    size = 32,
+    position = {32, 0}
+  },
+  {
+    type = "sprite",
+    name = "widih-pin-black",
+    filename = "__what-items-do-i-have__/graphics/pin.png",
+    size = 32
   }
 })

@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: ????
+  Features:
+    - The window will now close when E or Escape (whatever you use to close GUIs) is pressed
+    - Added a pin button, so that it stays open when pinned (regardless of what button is pressed)
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2025-04-03
   Bugfixes:
