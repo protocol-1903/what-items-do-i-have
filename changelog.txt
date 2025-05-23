@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.1
+Date: 2025-05-23
+  Changes:
+    - Each button now has a count listed on the button, and the whole window is more compact
+    - A tooltip per button now indicates the quality, item, and count in text form
+    - The window will now retain it's position when reopened
+---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 2025-04-11
   Features:

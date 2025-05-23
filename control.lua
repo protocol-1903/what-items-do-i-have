@@ -106,9 +106,12 @@ local function search(item, player)
     window.main.add{
       type = "table",
       name = "table",
-      column_count = 2
-    }.style.horizontal_spacing = 10
+      column_count = 5
+    }.style.horizontal_spacing = 5
   end
+
+  -- force window to visible
+  window.visible = true
 
   main = window.main
 
@@ -152,21 +155,18 @@ local function search(item, player)
 
     -- find quality items in network
     local items = {}
-    for q, quality in pairs(prototypes.quality) do
-      if q ~= "quality-unknown" then
+    for quality in pairs(prototypes.quality) do
+      if quality ~= "quality-unknown" then
+        local count = network.get_item_count{
+          name = item,
+          quality = quality
+        }
         main.table.add{
-          type = "choose-elem-button",
-          elem_type = "item-with-quality",
-          ["item-with-quality"] = {
-            name = item,
-            quality = q
-          }
-        }.locked = true
-        main.table.add{ type = "label", caption =
-          network.get_item_count{
-            name = item,
-            quality = quality.name
-          }
+          type = "sprite-button",
+          sprite = "item." .. item,
+          quality = quality,
+          number = count,
+          tooltip = {"widih-window.button-tooltip", {"entity-name." .. item}, {"quality-name." .. quality}, count }
         }
       end
     end
@@ -201,7 +201,7 @@ script.on_event(defines.events.on_gui_click, function (event)
   end
 
   if event.element.name == "close-button" then
-    window.destroy()
+    window.visible = false
   elseif event.element.name == "pin" then
     local pinned = not window.titlebar["pin"].toggled
     window.titlebar["pin"].toggled = pinned
@@ -210,11 +210,11 @@ script.on_event(defines.events.on_gui_click, function (event)
     elseif not pinned and not player.opened_self and not player.opened then
       player.opened = window
     end
-  elseif event.element.type == "choose-elem-button" then -- must be an icon button, put it in the hand
+  elseif event.element.type == "sprite-button" then
     if player.clear_cursor() then
       player.cursor_ghost = {
-        name = event.element.elem_value.name,
-        quality = event.element.elem_value.quality
+        name = event.element.sprite:sub(6),
+        quality = event.element.quality
       }
     end
   end
@@ -243,7 +243,7 @@ end)
 script.on_event(defines.events.on_gui_closed, function (event)
   if event.element and event.element.get_mod() == "what-items-do-i-have" and
     not event.element.titlebar.pin.toggled then
-    event.element.destroy()
+    event.element.visible = false
   end
 end)
 
