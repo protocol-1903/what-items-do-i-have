@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.2
+Date: 2025-05-23
+  Changes:
+    - Made the drag handle visible, like it should have been when it was implemented
+    - Clarified search location text
+    - Clarified tooltip text
+    - Cleaned up GUI code for readability
+  Bugfixes:
+    - Fixed a crash when changing the dropdown
+---------------------------------------------------------------------------------------------------
 Version: 1.2.1
 Date: 2025-05-23
   Changes:

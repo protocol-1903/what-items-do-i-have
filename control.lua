@@ -20,29 +20,40 @@ local function search(item, player)
       name = "widih-window",
       direction = "vertical"
     }
+
+    -- version text to check if its up to date
+    window.add{
+      type = "text-box",
+      name = "version",
+      text = script.active_mods["what-items-do-i-have"]
+    }.visible = false
+
     window.add{
       type = "flow",
       name = "titlebar",
       direction = "horizontal"
     }.style.natural_width = 180
     window.titlebar.drag_target = window
-    window.add{ -- way to check if window is up to date with current version of the script code, if not it will be deleted and replaced
-      type = "text-box",
-      name = "version",
-      text = script.active_mods["what-items-do-i-have"]
-    }.visible = false
+
     window.titlebar.add{
       type = "label",
       name = "label",
       style = "frame_title",
       caption = {"widih-network.nil"}
     }.drag_target = window
-    window.titlebar.add{
+
+    -- drag space thingy
+    local header = window.titlebar.add{
       type = "empty-widget",
-      name = "space",
-      style = "draggable_space"
-    }.style.horizontally_stretchable = true
-    window.titlebar.space.drag_target = window
+      style = "draggable_space_header"
+    }
+
+    header.style.horizontally_stretchable = true
+    header.style.natural_height = 24
+    header.style.height = 24
+    header.style.right_margin = 4
+    header.drag_target = window
+
     window.titlebar.add{
       type = "sprite-button",
       name = "pin",
@@ -51,27 +62,27 @@ local function search(item, player)
       hovered_sprite = "widih-pin-black",
       clicked_sprite = "widih-pin-black",
     }
+
     window.titlebar.add{
       type = "sprite-button",
       name = "close-button",
       style = "close_button",
       sprite = "utility/close"
     }
+
+    -- main content
     window.add{
       type = "frame",
       name = "main",
       direction = "vertical",
-      style = "inside_shallow_frame_with_padding"
+      style = "inside_shallow_frame_with_padding_and_vertical_spacing"
     }.style.horizontal_align = "right"
+
     window.main.add{
       type = "label",
-      name = "label",
       caption = {"widih-window.search-location"}
     }
-    window.main.add{
-      type = "empty-widget",
-      name = "space0"
-    }.style.minimal_height = 2
+
     window.main.add{
       type = "drop-down",
       name = "dropdown",
@@ -81,28 +92,22 @@ local function search(item, player)
       },
       selected_index = storage[player.index]
     }
-    window.main.add{
-      type = "empty-widget",
-      name = "space1"
-    }.style.minimal_height = 4
-    window.main.add{
-      type = "line",
-      name = "line"
-    }
-    window.main.add{
-      type = "empty-widget",
-      name = "space2"
-    }.style.minimal_height = 4
+
+    window.main.add{ type = "line" }
+
+    -- labels, only show if required and one at a time
     window.main.add{
       type = "label",
       name = "error-no-network",
       caption = {"widih-window.error-no-network"}
     }
+
     window.main.add{
       type = "label",
       name = "error-bad-entity",
       caption = {"widih-window.error-bad-entity"}
     }
+
     window.main.add{
       type = "table",
       name = "table",
@@ -203,8 +208,8 @@ script.on_event(defines.events.on_gui_click, function (event)
   if event.element.name == "close-button" then
     window.visible = false
   elseif event.element.name == "pin" then
-    local pinned = not window.titlebar["pin"].toggled
-    window.titlebar["pin"].toggled = pinned
+    local pinned = not window.titlebar.pin.toggled
+    window.titlebar.pin.toggled = pinned
     if pinned and player.opened == window then
       player.opened = nil
     elseif not pinned and not player.opened_self and not player.opened then
@@ -236,7 +241,7 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
   storage[player.index] = event.element.selected_index
 
   if window.main.table.visible then
-    search(window.main.table.children[1].elem_value.name, player)
+    search(window.main.table.children[1].sprite:sub(6), player)
   end
 end)
 
