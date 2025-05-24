@@ -186,7 +186,6 @@ local function search(item, player)
   window.visible = true
 
   if not window.titlebar.pin.toggled then
-    player.opened = window
     window.bring_to_front()
   end
 end
