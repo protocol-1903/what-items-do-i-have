@@ -17,6 +17,12 @@ local function search(item, player)
       name = "widih-window",
       direction = "vertical"
     }
+  end
+
+  if not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"] then window.clear() end
+
+  -- if window content does not exist
+  if #window.children == 0 then
 
     -- version text to check if its up to date
     window.add{
