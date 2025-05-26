@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.4
+Date: ????
+  Changes:
+    - Improved item name locale search to better support modded items
+  Bugfixes:
+    - Fixed unknown key errors in button tooltips
+---------------------------------------------------------------------------------------------------
 Version: 1.2.3
 Date: 2025-05-24
   Changes:

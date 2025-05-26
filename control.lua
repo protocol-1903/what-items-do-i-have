@@ -171,7 +171,7 @@ local function search(item, player)
           sprite = "item." .. item,
           quality = quality,
           number = count,
-          tooltip = {"widih-window.button-tooltip", {"entity-name." .. item}, {"quality-name." .. quality}, count }
+          tooltip = {"widih-window.button-tooltip", {"?", {"entity-name." .. item}, {"item-name." .. item}}, {"quality-name." .. quality}, count }
         }
       end
     end
@@ -184,10 +184,7 @@ local function search(item, player)
 
   -- make it visible and focus
   window.visible = true
-
-  if not window.titlebar.pin.toggled then
-    window.bring_to_front()
-  end
+  window.bring_to_front()
 end
 
 -- update gui events to reflect
