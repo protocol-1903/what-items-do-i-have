@@ -9,9 +9,6 @@ local function search(item, player)
 
   window = player.gui.screen["widih-window"]
 
-  -- end if anything is nil
-  if not item then return end
-
   -- if window does not exist (i.e. player is new to game)
   if not window then
     -- create new window
@@ -283,7 +280,7 @@ script.on_event("widih-search-network", function(event)
   if not prototype then return end
 
   -- get item
-  item = prototype.base_type == "item" and prototype.name or
+  item = prototype.base_type == "item" and not prototypes.item[prototype.name].has_flag("spawnable") and prototype.name or
   prototype.base_type == "recipe" and prototypes.recipe[prototype.name].main_product and prototypes.recipe[prototype.name].main_product.type == "item" and prototypes.recipe[prototype.name].main_product.name or
   prototype.base_type == "entity" and prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
 
@@ -299,6 +296,8 @@ script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
     -- get item
     item = player.cursor_ghost and player.cursor_ghost.name.name or player.cursor_stack.valid_for_read and player.cursor_stack.name
   
+    if player.is_cursor_blueprint() or not item or prototypes.item[item].has_flag("spawnable") then return end
+
     search(item, player)
   end
 end)
@@ -308,10 +307,12 @@ script.on_event(defines.events.on_selected_entity_changed, function(event)
   -- only run if shortcut is enabled
   if game.players[event.player_index].is_shortcut_toggled("widih-update-hover") and game.players[event.player_index].selected then
     player = game.players[event.player_index]
-    prototype = player.selected.type == "entity-ghost" and player.selected.ghost_name or player.selected.name
+    prototype = prototypes.entity[player.selected.type == "entity-ghost" and player.selected.ghost_name or player.selected.name]
+
+    if not prototype.mineable_properties.products or not prototype.has_flag("player-creation") then return end
 
     -- get item
-    item = prototypes.entity[prototype].items_to_place_this and #prototypes.entity[prototype].items_to_place_this == 1 and prototypes.entity[prototype].items_to_place_this[1].name
+    item = prototype.mineable_properties.products[1].name
 
     search(item, player)
   end

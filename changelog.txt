@@ -2,6 +2,8 @@
 Version: 1.2.4
 Date: ????
   Changes:
+    - More robust search filtering to not look for items that shouldn't be looked for
+    - Won't attempt to search for items that can't be built (rocks, trees, crashed ship, etc)
     - Improved item name locale search to better support modded items
   Bugfixes:
     - Fixed unknown key errors in button tooltips
