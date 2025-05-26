@@ -10,6 +10,8 @@ When the keybind is pressed (default: `ALT + Z`) a window will pop up, showing h
 
 Supports all mods, hopefully. If something doesn't work, let me know!
 
+Icons borrowed from [flib](https://mods.factorio.com/mod/flib)
+
 Requested by Tinyboss on the factorio forums
 
 If you have a mod idea, let me know and I can look into it.
