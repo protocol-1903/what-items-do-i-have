@@ -49,5 +49,18 @@ data:extend({
     name = "widih-pin-black",
     filename = "__what-items-do-i-have__/graphics/pin.png",
     size = 32
+  },
+  {
+    type = "sprite",
+    name = "widih-gear-white",
+    filename = "__what-items-do-i-have__/graphics/gear.png",
+    size = 32,
+    position = {32, 0}
+  },
+  {
+    type = "sprite",
+    name = "widih-gear-black",
+    filename = "__what-items-do-i-have__/graphics/gear.png",
+    size = 32
   }
 })

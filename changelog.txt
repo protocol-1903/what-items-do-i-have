@@ -2,7 +2,10 @@
 Version: 1.2.5
 Date: ????
   Changes:
-    - When updating, the window will keep its position instead of reverting to the corner
+    - Removed pin button, because it doesn't do anything anymore since the window will stay open all the time
+    - Added attributions to borrowed flib icons
+    - Added a separate popout settings menu; no more useless GUI space!
+    - Added more tooltip contexts
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.4
 Date: 2025-05-26

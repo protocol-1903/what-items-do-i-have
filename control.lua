@@ -5,24 +5,22 @@ local function search(item, player)
 
   window = player.gui.screen["widih-window"]
 
-  if window and (not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"]) then window.destroy() end
+  if window and (not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"]) then
+    window.destroy()
+  end
 
   window = player.gui.screen["widih-window"]
 
-  -- if window does not exist (i.e. player is new to game)
+  -- if window content does not exist
   if not window then
+
     -- create new window
     window = player.gui.screen.add{
       type = "frame",
       name = "widih-window",
-      direction = "vertical"
+      direction = "horizontal",
+      style = "invisible_frame"
     }
-  end
-
-  if not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"] then window.clear() end
-
-  -- if window content does not exist
-  if #window.children == 0 then
 
     -- version text to check if its up to date
     window.add{
@@ -32,21 +30,32 @@ local function search(item, player)
     }.visible = false
 
     window.add{
+      type = "frame",
+      name = "main",
+      direction = "vertical"
+    }.drag_target = window
+
+    window.add{
+      type = "frame",
+      name = "settings",
+      direction = "vertical"
+    }.drag_target = window
+    window.settings.visible = false
+
+    window.settings.add{
       type = "flow",
       name = "titlebar",
       direction = "horizontal"
-    }.style.natural_width = 180
-    window.titlebar.drag_target = window
+    }.drag_target = window
 
-    window.titlebar.add{
+    window.settings.titlebar.add{
       type = "label",
-      name = "label",
       style = "frame_title",
-      caption = {"widih-network.nil"}
+      caption = {"widih-window.settings"}
     }.drag_target = window
 
     -- drag space thingy
-    local header = window.titlebar.add{
+    local header = window.settings.titlebar.add{
       type = "empty-widget",
       style = "draggable_space_header"
     }
@@ -57,36 +66,28 @@ local function search(item, player)
     header.style.right_margin = 4
     header.drag_target = window
 
-    window.titlebar.add{
+    window.settings.titlebar.add{
       type = "sprite-button",
-      name = "pin",
-      style = "frame_action_button",
-      sprite = "widih-pin-white",
-      hovered_sprite = "widih-pin-black",
-      clicked_sprite = "widih-pin-black",
-    }
-
-    window.titlebar.add{
-      type = "sprite-button",
-      name = "close-button",
+      name = "settings-close",
       style = "close_button",
-      sprite = "utility/close"
+      sprite = "utility/close",
+      tooltip = { "widih-window.close-tooltip" }
     }
 
     -- main content
-    window.add{
+    window.settings.add{
       type = "frame",
-      name = "main",
+      name = "sub",
       direction = "vertical",
       style = "inside_shallow_frame_with_padding_and_vertical_spacing"
     }.style.horizontal_align = "right"
 
-    window.main.add{
+    window.settings.sub.add{
       type = "label",
       caption = {"widih-window.search-location"}
     }
 
-    window.main.add{
+    window.settings.sub.add{
       type = "drop-down",
       name = "dropdown",
       items = {
@@ -96,38 +97,95 @@ local function search(item, player)
       selected_index = storage[player.index]
     }
 
-    window.main.add{ type = "line" }
+    window.main.add{
+      type = "flow",
+      name = "titlebar",
+      direction = "horizontal"
+    }.style.natural_width = 180
+    window.main.titlebar.drag_target = window
+
+    window.main.titlebar.add{
+      type = "label",
+      name = "label",
+      style = "frame_title",
+      caption = {"widih-network.nil"}
+    }.drag_target = window
+
+    -- drag space thingy
+    header = window.main.titlebar.add{
+      type = "empty-widget",
+      style = "draggable_space_header"
+    }
+
+    header.style.horizontally_stretchable = true
+    header.style.natural_height = 24
+    header.style.height = 24
+    header.style.right_margin = 4
+    header.drag_target = window
+
+    window.main.titlebar.add{
+      type = "sprite-button",
+      name = "settings",
+      style = "frame_action_button",
+      sprite = "widih-gear-white",
+      hovered_sprite = "widih-gear-black",
+      clicked_sprite = "widih-gear-black",
+      tooltip = {"widih-window.settings-tooltip"}
+    }
+
+    -- window.main.titlebar.add{
+    --   type = "sprite-button",
+    --   name = "pin",
+    --   style = "frame_action_button",
+    --   sprite = "widih-pin-white",
+    --   hovered_sprite = "widih-pin-black",
+    --   clicked_sprite = "widih-pin-black",
+    --   tooltip = {"widih-window.pin-tooltip"}
+    -- }
+
+    window.main.titlebar.add{
+      type = "sprite-button",
+      name = "close-button",
+      style = "close_button",
+      sprite = "utility/close",
+      tooltip = { "widih-window.close-tooltip" }
+    }
+
+    -- main content
+    window.main.add{
+      type = "frame",
+      name = "sub",
+      direction = "vertical",
+      style = "inside_shallow_frame_with_padding_and_vertical_spacing"
+    }
 
     -- labels, only show if required and one at a time
-    window.main.add{
+    window.main.sub.add{
       type = "label",
       name = "error-no-network",
       caption = {"widih-window.error-no-network"}
     }
 
-    window.main.add{
+    window.main.sub.add{
       type = "label",
       name = "error-bad-entity",
       caption = {"widih-window.error-bad-entity"}
     }
 
-    window.main.add{
+    window.main.sub.add{
       type = "table",
       name = "table",
       column_count = 5
     }.style.horizontal_spacing = 5
   end
 
-  -- force window to visible
-  window.visible = true
-
-  main = window.main
+  content = window.main.sub
 
   if not item then
     -- invalid entity/no item found
-    main["error-no-network"].visible = false
-    main["error-bad-entity"].visible = true
-    main.table.visible = false
+    content["error-no-network"].visible = false
+    content["error-bad-entity"].visible = true
+    content.table.visible = false
     return
   end
 
@@ -137,29 +195,29 @@ local function search(item, player)
   if not player.character or player.controller_type ~= defines.controllers.remote or storage[player.index] == 2 then
     if player.surface.platform then
       network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.titlebar.label.caption = {"widih-network.platform"}
+      window.main.titlebar.label.caption = {"widih-network.platform"}
     elseif player.surface.find_closest_logistic_network_by_position(player.position, player.force) then
       network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
-      window.titlebar.label.caption = {"widih-network.logistic"}
+      window.main.titlebar.label.caption = {"widih-network.logistic"}
     end
   elseif player.controller_type == defines.controllers.remote and storage[player.index] == 1 and player.character then
     if player.character.surface.platform then
       network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.titlebar.label.caption = {"widih-network.platform"}
+      window.main.titlebar.label.caption = {"widih-network.platform"}
     elseif player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force) then
       network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
-      window.titlebar.label.caption = {"widih-network.logistic"}
+      window.main.titlebar.label.caption = {"widih-network.logistic"}
     end
   end
 
   if network then
     -- proper logistic network has been found
-    main["error-no-network"].visible = false
-    main["error-bad-entity"].visible = false
-    main.table.visible = true
+    content["error-no-network"].visible = false
+    content["error-bad-entity"].visible = false
+    content.table.visible = true
 
     -- reset table
-    main.table.clear()
+    content.table.clear()
 
     -- find quality items in network
     local items = {}
@@ -169,7 +227,7 @@ local function search(item, player)
           name = item,
           quality = quality
         }
-        main.table.add{
+        content.table.add{
           type = "sprite-button",
           sprite = "item." .. item,
           quality = quality,
@@ -180,14 +238,15 @@ local function search(item, player)
     end
   else
     -- no logistic network has been found, or player does not have the right technologies unlocked
-    main["error-no-network"].visible = true
-    main["error-bad-entity"].visible = false
-    main.table.visible = false
+    content["error-no-network"].visible = true
+    content["error-bad-entity"].visible = false
+    content.table.visible = false
   end
 
   -- make it visible and focus
   window.visible = true
   window.bring_to_front()
+  window.focus()
 end
 
 -- update gui events to reflect
@@ -204,11 +263,26 @@ script.on_event(defines.events.on_gui_click, function (event)
     return
   end
 
-  if event.element.name == "close-button" then
+  if event.element.name == "main-close" then
     window.visible = false
-  elseif event.element.name == "pin" then
-    local pinned = not window.titlebar.pin.toggled
-    window.titlebar.pin.toggled = pinned
+  elseif event.element.name == "settings-close" then
+    window.settings.visible = false
+    window.main.titlebar.settings.toggled = false
+  elseif event.element.name == "settings" then
+    local open = not window.settings.visible
+    window.settings.visible = open
+    window.main.titlebar.settings.toggled = open
+  -- elseif event.element.name == "pin" then
+  --   local pinned = not window.main.titlebar.pin.toggled
+  --   window.main.titlebar.pin.toggled = pinned
+  --   if pinned and player.opened == window then
+  --     player.opened = nil
+  --   elseif not pinned and not player.opened_self and not player.opened then
+  --     player.opened = window
+  --   end
+  elseif event.element.name == "settings" then
+    local pinned = not window.main.titlebar.pin.toggled
+    window.main.titlebar.pin.toggled = pinned
     if pinned and player.opened == window then
       player.opened = nil
     elseif not pinned and not player.opened_self and not player.opened then
@@ -239,17 +313,17 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
 
   storage[player.index] = event.element.selected_index
 
-  if window.main.table.visible then
-    search(window.main.table.children[1].sprite:sub(6), player)
+  if window.main.sub.table.visible then
+    search(window.main.sub.table.children[1].sprite:sub(6), player)
   end
 end)
 
-script.on_event(defines.events.on_gui_closed, function (event)
-  if event.element and event.element.get_mod() == "what-items-do-i-have" and
-    not event.element.titlebar.pin.toggled then
-    event.element.visible = false
-  end
-end)
+-- script.on_event(defines.events.on_gui_closed, function (event)
+--   if event.element and event.element.get_mod() == "what-items-do-i-have" and
+--     not event.element.main.titlebar.pin.toggled then
+--     event.element.visible = false
+--   end
+-- end)
 
 script.on_event("widih-update-hand", function (event)
   game.players[event.player_index].set_shortcut_toggled(
