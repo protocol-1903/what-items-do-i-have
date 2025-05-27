@@ -6,6 +6,7 @@ Date: 2025-05-27
     - Added attributions to borrowed flib icons
     - Added a separate popout settings menu; no more useless GUI space!
     - Added more tooltip contexts
+    - Updated thumbnail to reflect recent graphical changes
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.4
 Date: 2025-05-26
