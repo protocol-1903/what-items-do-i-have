@@ -145,7 +145,7 @@ local function search(item, player)
 
     window.main.titlebar.add{
       type = "sprite-button",
-      name = "close-button",
+      name = "main-close",
       style = "close_button",
       sprite = "utility/close",
       tooltip = { "widih-window.close-tooltip" }
