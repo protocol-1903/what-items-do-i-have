@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.7
+Date: 2025-06-04
+  Changes:
+    - Updated thumbnail, courtesy of Factorio Mod Tips on YouTube
+    - Updated description with showcase video
+---------------------------------------------------------------------------------------------------
 Version: 1.2.6
 Date: 2025-05-30
   Bugfixes:

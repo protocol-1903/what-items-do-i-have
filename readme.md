@@ -2,6 +2,9 @@
 
 When the keybind is pressed (default: `ALT + Z`) a window will pop up, showing how much of that item is in the local logistic network (and of what quality!)
 
+# Showcase:
+[![Showcase video](https://img.youtube.com/vi/UuJRbj8Qo1w/0.jpg)](https://youtube.com/watch=UuJRbj8Qo1w)
+
 # Additional Features:
 - Option to search the position of the remote view or the physical character position, when avaliable.
 - Search a space platform hub for items while in remote view, or when on the platform.
@@ -12,6 +15,6 @@ Supports all mods, hopefully. If something doesn't work, let me know!
 
 Icons borrowed from [flib](https://mods.factorio.com/mod/flib)
 
-Requested by Tinyboss on the factorio forums
+Requested by Tinyboss on the factorio forums, showcase by Factorio Mod Tips on YouTube.
 
 If you have a mod idea, let me know and I can look into it.
