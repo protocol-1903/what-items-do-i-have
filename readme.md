@@ -3,7 +3,7 @@
 When the keybind is pressed (default: `ALT + Z`) a window will pop up, showing how much of that item is in the local logistic network (and of what quality!)
 
 # Showcase:
-[![Showcase video](https://img.youtube.com/vi/UuJRbj8Qo1w/0.jpg)](https://youtube.com/watch=UuJRbj8Qo1w)
+[![Showcase video](https://img.youtube.com/vi/UuJRbj8Qo1w/0.jpg)](https://youtube.com/watch?v=UuJRbj8Qo1w)
 
 # Additional Features:
 - Option to search the position of the remote view or the physical character position, when avaliable.
