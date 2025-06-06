@@ -1,7 +1,14 @@
 local function search(item, player)
   if not player then return end
 
-  if not storage[player.index] then storage[player.index] = 1 end
+  if not storage[player.index] then
+    storage[player.index] = {
+      dropdown = 1,
+      checkbox = false
+    }
+  end
+
+  local location = storage[player.index].checkbox
 
   window = player.gui.screen["widih-window"]
 
@@ -94,7 +101,14 @@ local function search(item, player)
         {"widih-window.local-search"},
         {"widih-window.remote-search"}
       },
-      selected_index = storage[player.index]
+      selected_index = storage[player.index].dropdown
+    }
+
+    window.settings.sub.add{
+      type = "checkbox",
+      name = "show-surface",
+      state = location,
+      caption = {"widih-window.show-surface"}
     }
 
     window.main.add{
@@ -192,21 +206,21 @@ local function search(item, player)
   -- find network of player (or, the position of the map view)
   local network
 
-  if not player.character or player.controller_type ~= defines.controllers.remote or storage[player.index] == 2 then
+  if not player.character or player.controller_type ~= defines.controllers.remote or storage[player.index].dropdown == 2 then
     if player.surface.platform then
       network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.main.titlebar.label.caption = {"widih-network.platform"}
+      window.main.titlebar.label.caption = location and {"widih-network.platform-r", player.surface.platform.name} or {"widih-network.platform"}
     elseif player.surface.find_closest_logistic_network_by_position(player.position, player.force) then
       network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
-      window.main.titlebar.label.caption = {"widih-network.logistic"}
+      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", {"space-location-name." .. player.surface.name}} or {"widih-network.logistic"}
     end
-  elseif player.controller_type == defines.controllers.remote and storage[player.index] == 1 and player.character then
+  elseif player.controller_type == defines.controllers.remote and storage[player.index].dropdown == 1 and player.character then
     if player.character.surface.platform then
       network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.main.titlebar.label.caption = {"widih-network.platform"}
+      window.main.titlebar.label.caption = location and {"widih-network.platform-r", player.character.surface.platform.name} or {"widih-network.platform"}
     elseif player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force) then
       network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
-      window.main.titlebar.label.caption = {"widih-network.logistic"}
+      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", {"space-location-name." .. player.character.surface.name}} or {"widih-network.logistic"}
     end
   end
 
@@ -272,22 +286,14 @@ script.on_event(defines.events.on_gui_click, function (event)
     local open = not window.settings.visible
     window.settings.visible = open
     window.main.titlebar.settings.toggled = open
-  -- elseif event.element.name == "pin" then
-  --   local pinned = not window.main.titlebar.pin.toggled
-  --   window.main.titlebar.pin.toggled = pinned
-  --   if pinned and player.opened == window then
-  --     player.opened = nil
-  --   elseif not pinned and not player.opened_self and not player.opened then
-  --     player.opened = window
-  --   end
-  elseif event.element.name == "settings" then
-    local pinned = not window.main.titlebar.pin.toggled
-    window.main.titlebar.pin.toggled = pinned
-    if pinned and player.opened == window then
-      player.opened = nil
-    elseif not pinned and not player.opened_self and not player.opened then
-      player.opened = window
-    end
+  elseif event.element.name == "show-surface" then
+    storage[player.index].checkbox = event.element.state
+    local caption = player.gui.screen["widih-window"].main.titlebar.label.caption
+    local location = (not player.character or player.controller_type ~= defines.controllers.remote or storage[player.index].dropdown == 2) and player.surface or player.character.surface
+    player.gui.screen["widih-window"].main.titlebar.label.caption = {
+      "widih-network." .. (caption[1]:sub(15, 15) == "l" and "logistic" or "platform") .. (event.element.state and "-r" or ""),
+      event.element.state and (location.platform and location.platform.name or {"space-location-name." .. location.name}) or nil
+    }
   elseif event.element.type == "sprite-button" then
     if player.clear_cursor() then
       player.cursor_ghost = {
@@ -311,7 +317,7 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
     return
   end
 
-  storage[player.index] = event.element.selected_index
+  storage[player.index].dropdown = event.element.selected_index
 
   if window.main.sub.table.visible then
     search(window.main.sub.table.children[1].sprite:sub(6), player)
