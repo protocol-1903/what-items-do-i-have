@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.9
+Date: 2025-08-17
+  Locale:
+    - Added German locale courtesy of @Ingo_Igel
+  Bugfixes:
+    - Fixed missing locale key when quality is not enabled
+---------------------------------------------------------------------------------------------------
 Version: 1.2.8
 Date: 2025-06-06
   Changes:

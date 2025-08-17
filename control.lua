@@ -246,7 +246,7 @@ local function search(item, player)
           sprite = "item." .. item,
           quality = quality,
           number = count,
-          tooltip = {"widih-window.button-tooltip", {"?", {"entity-name." .. item}, {"item-name." .. item}}, {"quality-name." .. quality}, count }
+          tooltip = {"widih-window.button-tooltip" .. (script.feature_flags.quality and "-quality" or ""), {"?", {"entity-name." .. item}, {"item-name." .. item}}, count, {"quality-name." .. quality}}
         }
       end
     end
