@@ -1,14 +1,5 @@
-local function search(item, player)
+local function search(item, player, settings_changed)
   if not player then return end
-
-  if not storage[player.index] then
-    storage[player.index] = {
-      dropdown = 1,
-      checkbox = false
-    }
-  end
-
-  local location = storage[player.index].checkbox
 
   window = player.gui.screen["widih-window"]
 
@@ -91,24 +82,31 @@ local function search(item, player)
 
     window.settings.sub.add{
       type = "label",
-      caption = {"widih-window.search-location"}
+      caption = {"mod-setting-name.search-location"}
     }
 
     window.settings.sub.add{
       type = "drop-down",
-      name = "dropdown",
+      name = "search-location",
       items = {
-        {"widih-window.local-search"},
-        {"widih-window.remote-search"}
+        {"string-mod-setting-name.local-search"},
+        {"string-mod-setting-name.remote-search"}
       },
-      selected_index = storage[player.index].dropdown
+      selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
     }
 
     window.settings.sub.add{
       type = "checkbox",
       name = "show-surface",
-      state = location,
-      caption = {"widih-window.show-surface"}
+      state = player.mod_settings["widih-show-surface"].value,
+      caption = {"mod-setting-name.show-surface"}
+    }
+
+    window.settings.sub.add{
+      type = "checkbox",
+      name = "auto-hide",
+      state = player.mod_settings["widih-auto-hide"].value,
+      caption = {"mod-setting-name.auto-hide"}
     }
 
     window.main.add{
@@ -147,16 +145,6 @@ local function search(item, player)
       tooltip = {"widih-window.settings-tooltip"}
     }
 
-    -- window.main.titlebar.add{
-    --   type = "sprite-button",
-    --   name = "pin",
-    --   style = "frame_action_button",
-    --   sprite = "widih-pin-white",
-    --   hovered_sprite = "widih-pin-black",
-    --   clicked_sprite = "widih-pin-black",
-    --   tooltip = {"widih-window.pin-tooltip"}
-    -- }
-
     window.main.titlebar.add{
       type = "sprite-button",
       name = "main-close",
@@ -191,6 +179,10 @@ local function search(item, player)
       name = "table",
       column_count = 5
     }.style.horizontal_spacing = 5
+  elseif settings_changed then -- update settings if required
+    window.settings.sub["search-location"].selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
+    window.settings.sub["show-surface"].state = player.mod_settings["widih-show-surface"].value
+    window.settings.sub["auto-hide"].state = player.mod_settings["widih-auto-hide"].value
   end
 
   content = window.main.sub
@@ -206,7 +198,7 @@ local function search(item, player)
   -- find network of player (or, the position of the map view)
   local network
 
-  if not player.character or player.controller_type ~= defines.controllers.remote or storage[player.index].dropdown == 2 then
+  if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
     if player.surface.platform then
       network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
       window.main.titlebar.label.caption = location and {"widih-network.platform-r", player.surface.platform.name} or {"widih-network.platform"}
@@ -214,7 +206,7 @@ local function search(item, player)
       network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
       window.main.titlebar.label.caption = location and {"widih-network.logistic-r", {"space-location-name." .. player.surface.name}} or {"widih-network.logistic"}
     end
-  elseif player.controller_type == defines.controllers.remote and storage[player.index].dropdown == 1 and player.character then
+  elseif player.controller_type == defines.controllers.remote and player.mod_settings["widih-search-location"].value == "local-search" and player.character then
     if player.character.surface.platform then
       network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
       window.main.titlebar.label.caption = location and {"widih-network.platform-r", player.character.surface.platform.name} or {"widih-network.platform"}
@@ -287,13 +279,15 @@ script.on_event(defines.events.on_gui_click, function (event)
     window.settings.visible = open
     window.main.titlebar.settings.toggled = open
   elseif event.element.name == "show-surface" then
-    storage[player.index].checkbox = event.element.state
+    player.mod_settings["widih-show-surface"] = {value = event.element.state}
     local caption = player.gui.screen["widih-window"].main.titlebar.label.caption
-    local location = (not player.character or player.controller_type ~= defines.controllers.remote or storage[player.index].dropdown == 2) and player.surface or player.character.surface
+    local location = (not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search") and player.surface or player.character.surface
     player.gui.screen["widih-window"].main.titlebar.label.caption = {
       "widih-network." .. (caption[1]:sub(15, 15) == "l" and "logistic" or "platform") .. (event.element.state and "-r" or ""),
       event.element.state and (location.platform and location.platform.name or {"space-location-name." .. location.name}) or nil
     }
+  elseif event.element.name == "auto-hide" then
+    player.mod_settings["widih-auto-hide"] = {value = event.element.state}
   elseif event.element.type == "sprite-button" then
     if player.clear_cursor() then
       player.cursor_ghost = {
@@ -317,19 +311,19 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
     return
   end
 
-  storage[player.index].dropdown = event.element.selected_index
+  player.mod_settings["widih-search-location"] = {value = event.element.selected_index == 1 and "local-search" or "remote-search"}
 
   if window.main.sub.table.visible then
     search(window.main.sub.table.children[1].sprite:sub(6), player)
   end
 end)
 
--- script.on_event(defines.events.on_gui_closed, function (event)
---   if event.element and event.element.get_mod() == "what-items-do-i-have" and
---     not event.element.main.titlebar.pin.toggled then
---     event.element.visible = false
---   end
--- end)
+-- update the GUI when mod settings change
+script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
+  if event.setting_type == "runtime-per-user" and event.player_index then
+    search(nil, game.get_player(event.player_index), true)
+  end
+end)
 
 script.on_event("widih-update-hand", function (event)
   game.players[event.player_index].set_shortcut_toggled(
@@ -375,9 +369,9 @@ end)
 
 -- update on hand stack change
 script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
+  local player = game.players[event.player_index]
   -- only run if cursor is not empty and the shortcut is on
-  if not game.players[event.player_index].is_cursor_empty() and game.players[event.player_index].is_shortcut_toggled("widih-update-hand") then
-    player = game.players[event.player_index]
+  if not player.is_cursor_empty() and player.is_shortcut_toggled("widih-update-hand") then
   
     -- get item
     item = player.cursor_ghost and player.cursor_ghost.name.name or player.cursor_stack.valid_for_read and player.cursor_stack.name
@@ -385,6 +379,8 @@ script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
     if player.is_cursor_blueprint() or not item or prototypes.item[item].has_flag("spawnable") then return end
 
     search(item, player)
+  elseif player.is_cursor_empty() and player.mod_settings["widih-auto-hide"].value and player.gui.screen["widih-window"] then
+    player.gui.screen["widih-window"].visible = false -- auto hide if the setting is enabled
   end
 end)
 

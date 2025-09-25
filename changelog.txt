@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.10
+Date: 2025-09-25
+  Features:
+    - Added a setting to auto-hide the GUI when the cursor is cleared. Best used with the "hovering over an entity" setting disabled
+  Changes:
+    - Mod settings are actually stored in settings, and can be changed from the settings window.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.9
 Date: 2025-08-17
   Locale:
