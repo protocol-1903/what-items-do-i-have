@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.12
-Date: ????
+Date: 2025-10-02
   Bugfixes:
     - Fixed "show relevant surface" mod setting being nonfunctional
     - Fixed surface name showing up as a missing locale key when space exploration is installed. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/4
