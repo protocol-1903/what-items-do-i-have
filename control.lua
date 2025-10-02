@@ -207,7 +207,7 @@ local function search(item, player, settings_changed)
     if player.surface.platform then
       network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
       window.main.titlebar.label.caption = location and {"widih-network.platform-r", get_location(player.surface)} or {"widih-network.platform"}
-    elseif player.surface.find_closest_logistic_network_by_position(player.position, player.force) then
+    else
       network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
       window.main.titlebar.label.caption = location and {"widih-network.logistic-r", get_location(player.surface)} or {"widih-network.logistic"}
     end
@@ -215,7 +215,7 @@ local function search(item, player, settings_changed)
     if player.character.surface.platform then
       network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
       window.main.titlebar.label.caption = location and {"widih-network.platform-r", get_location(player.character.surface)} or {"widih-network.platform"}
-    elseif player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force) then
+    else
       network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
       window.main.titlebar.label.caption = location and {"widih-network.logistic-r", get_location(player.character.surface)} or {"widih-network.logistic"}
     end
