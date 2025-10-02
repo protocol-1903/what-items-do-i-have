@@ -197,6 +197,7 @@ local function search(item, player, settings_changed)
 
   -- find network of player (or, the position of the map view)
   local network
+  local location = player.mod_settings["widih-show-surface"].value or false
 
   if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
     if player.surface.platform then
