@@ -1,3 +1,7 @@
+local function get_location(surface)
+  return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
+end
+
 local function search(item, player, settings_changed)
   if not player then return end
 
@@ -202,18 +206,18 @@ local function search(item, player, settings_changed)
   if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
     if player.surface.platform then
       network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.main.titlebar.label.caption = location and {"widih-network.platform-r", player.surface.platform.name} or {"widih-network.platform"}
+      window.main.titlebar.label.caption = location and {"widih-network.platform-r", get_location(player.surface)} or {"widih-network.platform"}
     elseif player.surface.find_closest_logistic_network_by_position(player.position, player.force) then
       network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
-      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", {"space-location-name." .. player.surface.name}} or {"widih-network.logistic"}
+      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", get_location(player.surface)} or {"widih-network.logistic"}
     end
   elseif player.controller_type == defines.controllers.remote and player.mod_settings["widih-search-location"].value == "local-search" and player.character then
     if player.character.surface.platform then
       network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.main.titlebar.label.caption = location and {"widih-network.platform-r", player.character.surface.platform.name} or {"widih-network.platform"}
+      window.main.titlebar.label.caption = location and {"widih-network.platform-r", get_location(player.character.surface)} or {"widih-network.platform"}
     elseif player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force) then
       network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
-      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", {"space-location-name." .. player.character.surface.name}} or {"widih-network.logistic"}
+      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", get_location(player.character.surface)} or {"widih-network.logistic"}
     end
   end
 
