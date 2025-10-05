@@ -1,3 +1,11 @@
+script.on_configuration_changed(function (event)
+  if not event.mod_changes["what-items-do-i-have"] then return end
+  -- when the mod version changes, delete the UI so it's recreated from the ground up (in case anything changes)
+  for _, player in pairs(game.players) do
+    if player.gui.screen["widih-window"] then player.gui.screen["widih-window"].destroy() end
+  end
+end)
+
 local function get_location(surface)
   return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
 end
