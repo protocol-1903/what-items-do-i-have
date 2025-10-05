@@ -2,12 +2,14 @@ local function get_location(surface)
   return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
 end
 
-local function search(item, player, settings_changed)
-  if not player then return end
+local function search(item, player_index, settings_changed)
+  if not player_index then return end
 
-  window = player.gui.screen["widih-window"]
+  local player = game.get_player(player_index)
 
-  if window and (not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"]) then
+  local window = player.gui.screen["widih-window"]
+
+  if window and (not (window.version or {}).text ~= script.active_mods["what-items-do-i-have"]) then
     window.destroy()
   end
 
@@ -189,7 +191,7 @@ local function search(item, player, settings_changed)
     window.settings.sub["auto-hide"].state = player.mod_settings["widih-auto-hide"].value
   end
 
-  content = window.main.sub
+  local content = window.main.sub
 
   if not item then
     -- invalid entity/no item found
@@ -265,9 +267,9 @@ script.on_event(defines.events.on_gui_click, function (event)
 
   if event.element.get_mod() ~= "what-items-do-i-have" then return end
   
-  local player = game.players[event.player_index]
+  local player = game.get_player(event.player_index)
 
-  window = player.gui.screen["widih-window"]
+  local window = player.gui.screen["widih-window"]
 
   if not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"] then
     window.destroy()
@@ -307,7 +309,7 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
 
   if event.element.get_mod() ~= "what-items-do-i-have" then return end
   
-  local player = game.players[event.player_index]
+  local player = game.get_player(event.player_index)
 
   window = player.gui.screen["widih-window"]
 
@@ -319,71 +321,70 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
   player.mod_settings["widih-search-location"] = {value = event.element.selected_index == 1 and "local-search" or "remote-search"}
 
   if window.main.sub.table.visible then
-    search(window.main.sub.table.children[1].sprite:sub(6), player)
+    search(window.main.sub.table.children[1].sprite:sub(6), player.index)
   end
 end)
 
 -- update the GUI when mod settings change
 script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
   if event.setting_type == "runtime-per-user" and event.player_index then
-    search(nil, game.get_player(event.player_index), true)
+    search(nil, event.player_index, true)
   end
 end)
 
 script.on_event("widih-update-hand", function (event)
-  game.players[event.player_index].set_shortcut_toggled(
+  game.get_player(event.player_index).set_shortcut_toggled(
     "widih-update-hand",
-    not game.players[event.player_index].is_shortcut_toggled("widih-update-hand")
+    not game.get_player(event.player_index).is_shortcut_toggled("widih-update-hand")
   )
 end)
 
 script.on_event("widih-update-hover", function (event)
-  game.players[event.player_index].set_shortcut_toggled(
+  game.get_player(event.player_index).set_shortcut_toggled(
     "widih-update-hover",
-    not game.players[event.player_index].is_shortcut_toggled("widih-update-hover")
+    not game.get_player(event.player_index).is_shortcut_toggled("widih-update-hover")
   )
 end)
 
 script.on_event(defines.events.on_lua_shortcut, function (event)
   if event.prototype_name == "widih-update-hand" then
-    game.players[event.player_index].set_shortcut_toggled(
+    game.get_player(event.player_index).set_shortcut_toggled(
       "widih-update-hand",
-      not game.players[event.player_index].is_shortcut_toggled("widih-update-hand")
+      not get_player(event.player_index).is_shortcut_toggled("widih-update-hand")
     )
   elseif event.prototype_name == "widih-update-hover" then
-    game.players[event.player_index].set_shortcut_toggled(
+    game.get_player(event.player_index).set_shortcut_toggled(
       "widih-update-hover",
-      not game.players[event.player_index].is_shortcut_toggled("widih-update-hover")
+      not game.get_player(event.player_index).is_shortcut_toggled("widih-update-hover")
     )
   end
 end)
 
 script.on_event("widih-search-network", function(event)
-  player = game.players[event.player_index]
-  prototype = event.selected_prototype
+  local prototype = event.selected_prototype
 
   if not prototype then return end
 
   -- get item
-  item = prototype.base_type == "item" and not prototypes.item[prototype.name].has_flag("spawnable") and prototype.name or
+  local item = prototype.base_type == "item" and not prototypes.item[prototype.name].has_flag("spawnable") and prototype.name or
   prototype.base_type == "recipe" and prototypes.recipe[prototype.name].main_product and prototypes.recipe[prototype.name].main_product.type == "item" and prototypes.recipe[prototype.name].main_product.name or
   prototype.base_type == "entity" and prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
 
-  search(item, player)
+  search(item, event.player_index)
 end)
 
 -- update on hand stack change
 script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
-  local player = game.players[event.player_index]
+  local player = game.get_player(event.player_index)
   -- only run if cursor is not empty and the shortcut is on
   if not player.is_cursor_empty() and player.is_shortcut_toggled("widih-update-hand") then
   
     -- get item
-    item = player.cursor_ghost and player.cursor_ghost.name.name or player.cursor_stack.valid_for_read and player.cursor_stack.name
+    local item = player.cursor_ghost and player.cursor_ghost.name.name or player.cursor_stack.valid_for_read and player.cursor_stack.name
   
     if player.is_cursor_blueprint() or not item or prototypes.item[item].has_flag("spawnable") then return end
 
-    search(item, player)
+    search(item, player.index)
   elseif player.is_cursor_empty() and player.mod_settings["widih-auto-hide"].value and player.gui.screen["widih-window"] then
     player.gui.screen["widih-window"].visible = false -- auto hide if the setting is enabled
   end
@@ -391,16 +392,16 @@ end)
 
 -- update on hover
 script.on_event(defines.events.on_selected_entity_changed, function(event)
+  local player = game.get_player(event.player_index)
   -- only run if shortcut is enabled
-  if game.players[event.player_index].is_shortcut_toggled("widih-update-hover") and game.players[event.player_index].selected then
-    player = game.players[event.player_index]
-    prototype = prototypes.entity[player.selected.type == "entity-ghost" and player.selected.ghost_name or player.selected.name]
+  if player.is_shortcut_toggled("widih-update-hover") and player.selected then
+    local prototype = prototypes.entity[player.selected.type == "entity-ghost" and player.selected.ghost_name or player.selected.name]
 
     if not prototype.mineable_properties.products or not prototype.has_flag("player-creation") then return end
 
     -- get item
-    item = prototype.mineable_properties.products[1].name
+    local item = prototype.mineable_properties.products[1].name
 
-    search(item, player)
+    search(item, player.index)
   end
 end)
