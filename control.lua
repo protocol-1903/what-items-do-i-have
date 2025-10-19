@@ -96,7 +96,7 @@ local function search(item, player_index, settings_changed)
 
     window.settings.sub.add{
       type = "label",
-      caption = {"mod-setting-name.search-location"}
+      caption = {"mod-setting-name.widih-search-location"}
     }
 
     window.settings.sub.add{
@@ -113,14 +113,14 @@ local function search(item, player_index, settings_changed)
       type = "checkbox",
       name = "show-surface",
       state = player.mod_settings["widih-show-surface"].value,
-      caption = {"mod-setting-name.show-surface"}
+      caption = {"mod-setting-name.widih-show-surface"}
     }
 
     window.settings.sub.add{
       type = "checkbox",
       name = "auto-hide",
       state = player.mod_settings["widih-auto-hide"].value,
-      caption = {"mod-setting-name.auto-hide"}
+      caption = {"mod-setting-name.widih-auto-hide"}
     }
 
     window.main.add{
