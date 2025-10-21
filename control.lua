@@ -10,22 +10,15 @@ local function get_location(surface)
   return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
 end
 
-local function search(item, player_index, settings_changed)
+local function update_gui(player_index, tabledata, network, label)
   if not player_index then return end
 
   local player = game.get_player(player_index)
 
   local window = player.gui.screen["widih-window"]
 
-  if window and (not (window.version or {}).text ~= script.active_mods["what-items-do-i-have"]) then
-    window.destroy()
-  end
-
-  window = player.gui.screen["widih-window"]
-
-  -- if window content does not exist
+  -- if window content does not exist (mod version change or fresh install)
   if not window then
-
     -- create new window
     window = player.gui.screen.add{
       type = "frame",
@@ -33,13 +26,6 @@ local function search(item, player_index, settings_changed)
       direction = "horizontal",
       style = "invisible_frame"
     }
-
-    -- version text to check if its up to date
-    window.add{
-      type = "text-box",
-      name = "version",
-      text = script.active_mods["what-items-do-i-have"]
-    }.visible = false
 
     window.add{
       type = "frame",
@@ -134,7 +120,7 @@ local function search(item, player_index, settings_changed)
       type = "label",
       name = "label",
       style = "frame_title",
-      caption = {"widih-network.nil"}
+      caption = label or {"widih-network.nil"}
     }.drag_target = window
 
     -- drag space thingy
@@ -193,7 +179,8 @@ local function search(item, player_index, settings_changed)
       name = "table",
       column_count = 5
     }.style.horizontal_spacing = 5
-  elseif settings_changed then -- update settings if required
+  else -- update things, they may have changed
+    window.main.titlebar.caption = label or window.main.titlebar.caption
     window.settings.sub["search-location"].selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
     window.settings.sub["show-surface"].state = player.mod_settings["widih-show-surface"].value
     window.settings.sub["auto-hide"].state = player.mod_settings["widih-auto-hide"].value
@@ -201,37 +188,17 @@ local function search(item, player_index, settings_changed)
 
   local content = window.main.sub
 
-  if not item then
+  if not network then
+    -- no logistic network has been found, or player does not have the right technologies unlocked
+    content["error-no-network"].visible = true
+    content["error-bad-entity"].visible = false
+    content.table.visible = false
+  elseif not tabledata then
     -- invalid entity/no item found
     content["error-no-network"].visible = false
     content["error-bad-entity"].visible = true
     content.table.visible = false
-    return
-  end
-
-  -- find network of player (or, the position of the map view)
-  local network
-  local location = player.mod_settings["widih-show-surface"].value or false
-
-  if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
-    if player.surface.platform then
-      network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.main.titlebar.label.caption = location and {"widih-network.platform-r", get_location(player.surface)} or {"widih-network.platform"}
-    else
-      network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
-      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", get_location(player.surface)} or {"widih-network.logistic"}
-    end
-  elseif player.controller_type == defines.controllers.remote and player.mod_settings["widih-search-location"].value == "local-search" and player.character then
-    if player.character.surface.platform then
-      network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      window.main.titlebar.label.caption = location and {"widih-network.platform-r", get_location(player.character.surface)} or {"widih-network.platform"}
-    else
-      network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
-      window.main.titlebar.label.caption = location and {"widih-network.logistic-r", get_location(player.character.surface)} or {"widih-network.logistic"}
-    end
-  end
-
-  if network then
+  elseif #tabledata ~= 0 then -- sometimes you just want to update the gui
     -- proper logistic network has been found
     content["error-no-network"].visible = false
     content["error-bad-entity"].visible = false
@@ -240,15 +207,61 @@ local function search(item, player_index, settings_changed)
     -- reset table
     content.table.clear()
 
+    for _, guielement in pairs(tabledata) do
+      content.table.add(guielement)
+    end
+  end
+
+  -- make it visible and focus
+  window.visible = true
+  window.bring_to_front()
+  window.focus()
+end
+
+local function search(item, player_index)
+  if not player_index then return end
+
+  local player = game.get_player(player_index)
+
+  -- find network of player (or, the position of the map view)
+  local network
+  local location = player.mod_settings["widih-show-surface"].value or false
+
+  if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
+    if player.surface.platform then
+      network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
+      label = location and {"widih-network.platform-r", get_location(player.surface)} or {"widih-network.platform"}
+    else
+      network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
+      label = location and {"widih-network.logistic-r", get_location(player.surface)} or {"widih-network.logistic"}
+    end
+  elseif player.controller_type == defines.controllers.remote and player.mod_settings["widih-search-location"].value == "local-search" and player.character then
+    if player.character.surface.platform then
+      network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
+      label = location and {"widih-network.platform-r", get_location(player.character.surface)} or {"widih-network.platform"}
+    else
+      network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
+      label = location and {"widih-network.logistic-r", get_location(player.character.surface)} or {"widih-network.logistic"}
+    end
+  end
+
+  local tabledata
+  if type(item) == "table" and player.gui.screen["widih-window"] and player.gui.screen["widih-window"].main.sub[1] then
+    -- research (lol)
+    item = player.gui.screen["widih-window"].main.sub[1].sprite:sub(6) or nil
+  end
+
+  if network and item then
+    tabledata = {}
     -- find quality items in network
-    local items = {}
     for quality in pairs(prototypes.quality) do
       if quality ~= "quality-unknown" then
         local count = network.get_item_count{
           name = item,
           quality = quality
         }
-        content.table.add{
+        -- just shove the following into the table when required
+        tabledata[#tabledata+1] = {
           type = "sprite-button",
           sprite = "item." .. item,
           quality = quality,
@@ -257,17 +270,9 @@ local function search(item, player_index, settings_changed)
         }
       end
     end
-  else
-    -- no logistic network has been found, or player does not have the right technologies unlocked
-    content["error-no-network"].visible = true
-    content["error-bad-entity"].visible = false
-    content.table.visible = false
   end
 
-  -- make it visible and focus
-  window.visible = true
-  window.bring_to_front()
-  window.focus()
+  update_gui(player.index, tabledata, network, label)
 end
 
 -- update gui events to reflect
@@ -279,11 +284,6 @@ script.on_event(defines.events.on_gui_click, function (event)
 
   local window = player.gui.screen["widih-window"]
 
-  if not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"] then
-    window.destroy()
-    return
-  end
-
   if event.element.name == "main-close" then
     window.visible = false
   elseif event.element.name == "settings-close" then
@@ -294,13 +294,14 @@ script.on_event(defines.events.on_gui_click, function (event)
     window.settings.visible = open
     window.main.titlebar.settings.toggled = open
   elseif event.element.name == "show-surface" then
-    player.mod_settings["widih-show-surface"] = {value = event.element.state}
-    local caption = player.gui.screen["widih-window"].main.titlebar.label.caption
-    local location = (not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search") and player.surface or player.character.surface
-    player.gui.screen["widih-window"].main.titlebar.label.caption = {
-      "widih-network." .. (caption[1]:sub(15, 15) == "l" and "logistic" or "platform") .. (event.element.state and "-r" or ""),
-      event.element.state and (location.platform and location.platform.name or {"space-location-name." .. location.name}) or nil
-    }
+    -- player.mod_settings["widih-show-surface"] = {value = event.element.state}
+    -- local caption = player.gui.screen["widih-window"].main.titlebar.label.caption
+    -- local location = (not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search") and player.surface or player.character.surface
+    -- player.gui.screen["widih-window"].main.titlebar.label.caption = {
+    --   "widih-network." .. (caption[1]:sub(15, 15) == "l" and "logistic" or "platform") .. (event.element.state and "-r" or ""),
+    --   event.element.state and (location.platform and location.platform.name or {"space-location-name." .. location.name}) or nil
+    -- }
+    search({}, player.index)
   elseif event.element.name == "auto-hide" then
     player.mod_settings["widih-auto-hide"] = {value = event.element.state}
   elseif event.element.type == "sprite-button" then
@@ -329,14 +330,14 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
   player.mod_settings["widih-search-location"] = {value = event.element.selected_index == 1 and "local-search" or "remote-search"}
 
   if window.main.sub.table.visible then
-    search(window.main.sub.table.children[1].sprite:sub(6), player.index)
+    search({}, player.index)
   end
 end)
 
 -- update the GUI when mod settings change
 script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
   if event.setting_type == "runtime-per-user" and event.player_index then
-    search(nil, event.player_index, true)
+    search({}, event.player_index)
   end
 end)
 
