@@ -245,14 +245,13 @@ local function search(item, player_index)
     end
   end
 
-  local tabledata
-  if type(item) == "table" and player.gui.screen["widih-window"] and player.gui.screen["widih-window"].main.sub[1] then
+  local tabledata = {}
+  if type(item) == "table" and player.gui.screen["widih-window"] and player.gui.screen["widih-window"].main.sub.table.children[1] then
     -- research (lol)
-    item = player.gui.screen["widih-window"].main.sub[1].sprite:sub(6) or nil
+    item = player.gui.screen["widih-window"].main.sub.table.children[1].sprite:sub(6) or nil
   end
 
   if network and item then
-    tabledata = {}
     -- find quality items in network
     for quality in pairs(prototypes.quality) do
       if quality ~= "quality-unknown" then
@@ -294,14 +293,7 @@ script.on_event(defines.events.on_gui_click, function (event)
     window.settings.visible = open
     window.main.titlebar.settings.toggled = open
   elseif event.element.name == "show-surface" then
-    -- player.mod_settings["widih-show-surface"] = {value = event.element.state}
-    -- local caption = player.gui.screen["widih-window"].main.titlebar.label.caption
-    -- local location = (not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search") and player.surface or player.character.surface
-    -- player.gui.screen["widih-window"].main.titlebar.label.caption = {
-    --   "widih-network." .. (caption[1]:sub(15, 15) == "l" and "logistic" or "platform") .. (event.element.state and "-r" or ""),
-    --   event.element.state and (location.platform and location.platform.name or {"space-location-name." .. location.name}) or nil
-    -- }
-    search({}, player.index)
+    player.mod_settings["widih-show-surface"] = {value = event.element.state}
   elseif event.element.name == "auto-hide" then
     player.mod_settings["widih-auto-hide"] = {value = event.element.state}
   elseif event.element.type == "sprite-button" then
