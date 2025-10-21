@@ -115,7 +115,6 @@ local function update_gui(player_index, tabledata, network, label)
       direction = "horizontal"
     }.style.natural_width = 180
     window.main.titlebar.drag_target = window
-
     window.main.titlebar.add{
       type = "label",
       name = "label",
@@ -180,7 +179,7 @@ local function update_gui(player_index, tabledata, network, label)
       column_count = 5
     }.style.horizontal_spacing = 5
   else -- update things, they may have changed
-    window.main.titlebar.caption = label or window.main.titlebar.caption
+    window.main.titlebar.label.caption = label or window.main.titlebar.caption
     window.settings.sub["search-location"].selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
     window.settings.sub["show-surface"].state = player.mod_settings["widih-show-surface"].value
     window.settings.sub["auto-hide"].state = player.mod_settings["widih-auto-hide"].value
@@ -224,7 +223,7 @@ local function search(item, player_index)
   local player = game.get_player(player_index)
 
   -- find network of player (or, the position of the map view)
-  local network
+  local network, label
   local location = player.mod_settings["widih-show-surface"].value or false
 
   if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
@@ -312,18 +311,9 @@ script.on_event(defines.events.on_gui_selection_state_changed, function (event)
   
   local player = game.get_player(event.player_index)
 
-  window = player.gui.screen["widih-window"]
-
-  if not window.version or window.version.text ~= script.active_mods["what-items-do-i-have"] then
-    window.destroy()
-    return
-  end
-
   player.mod_settings["widih-search-location"] = {value = event.element.selected_index == 1 and "local-search" or "remote-search"}
 
-  if window.main.sub.table.visible then
-    search({}, player.index)
-  end
+  search({}, player.index)
 end)
 
 -- update the GUI when mod settings change
