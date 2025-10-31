@@ -341,7 +341,7 @@ script.on_event(defines.events.on_lua_shortcut, function (event)
   if event.prototype_name == "widih-update-hand" then
     game.get_player(event.player_index).set_shortcut_toggled(
       "widih-update-hand",
-      not get_player(event.player_index).is_shortcut_toggled("widih-update-hand")
+      not game.get_player(event.player_index).is_shortcut_toggled("widih-update-hand")
     )
   elseif event.prototype_name == "widih-update-hover" then
     game.get_player(event.player_index).set_shortcut_toggled(
