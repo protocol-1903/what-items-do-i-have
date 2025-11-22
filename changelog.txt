@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.15
+Date: 2025-11-22
+  Changes:
+    - Switched to show_gui and hide_gui internal functions
+  Bugfixes:
+    - Fixed that an update to the player mod settings would attempt to search for the last searched item instead of updating the GUI, sometimes crashing the game
+---------------------------------------------------------------------------------------------------
 Version: 1.2.14
 Date: 2025-10-31
   Bugfixes:

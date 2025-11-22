@@ -10,6 +10,22 @@ local function get_location(surface)
   return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
 end
 
+local function show_gui(player_index)
+  if not player_index then return end
+  local window = game.get_player(player_index).gui.screen["widih-window"]
+  if not window then return end
+  window.visible = true
+  window.bring_to_front()
+  window.focus()
+end
+
+local function  hide_gui(player_index)
+  if not player_index then return end
+  local window = game.get_player(player_index).gui.screen["widih-window"]
+  if not window then return end
+  window.visible = false
+end
+
 local function update_gui(player_index, tabledata, network, label)
   if not player_index then return end
 
@@ -25,7 +41,8 @@ local function update_gui(player_index, tabledata, network, label)
       name = "widih-window",
       direction = "horizontal",
       style = "invisible_frame"
-    }
+    } -- hide, initially
+    window.visible = false
 
     window.add{
       type = "frame",
@@ -210,11 +227,6 @@ local function update_gui(player_index, tabledata, network, label)
       content.table.add(guielement)
     end
   end
-
-  -- make it visible and focus
-  window.visible = true
-  window.bring_to_front()
-  window.focus()
 end
 
 local function search(item, player_index)
@@ -283,7 +295,7 @@ script.on_event(defines.events.on_gui_click, function (event)
   local window = player.gui.screen["widih-window"]
 
   if event.element.name == "main-close" then
-    window.visible = false
+    hide_gui(player.index)
   elseif event.element.name == "settings-close" then
     window.settings.visible = false
     window.main.titlebar.settings.toggled = false
@@ -319,7 +331,7 @@ end)
 -- update the GUI when mod settings change
 script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
   if event.setting_type == "runtime-per-user" and event.player_index then
-    search({}, event.player_index)
+    update_gui(event.player_index, {}, true)
   end
 end)
 
@@ -362,6 +374,7 @@ script.on_event("widih-search-network", function(event)
   prototype.base_type == "entity" and prototypes.entity[prototype.name].items_to_place_this and #prototypes.entity[prototype.name].items_to_place_this == 1 and prototypes.entity[prototype.name].items_to_place_this[1].name
 
   search(item, event.player_index)
+  show_gui(event.player_index)
 end)
 
 -- update on hand stack change
@@ -376,8 +389,9 @@ script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
     if player.is_cursor_blueprint() or not item or prototypes.item[item].has_flag("spawnable") then return end
 
     search(item, player.index)
-  elseif player.is_cursor_empty() and player.mod_settings["widih-auto-hide"].value and player.gui.screen["widih-window"] then
-    player.gui.screen["widih-window"].visible = false -- auto hide if the setting is enabled
+    show_gui(player.index)
+  elseif player.is_cursor_empty() and player.mod_settings["widih-auto-hide"].value then
+    hide_gui(player.index)
   end
 end)
 
@@ -394,5 +408,6 @@ script.on_event(defines.events.on_selected_entity_changed, function(event)
     local item = prototype.mineable_properties.products[1].name
 
     search(item, player.index)
+    show_gui(player.index)
   end
 end)
