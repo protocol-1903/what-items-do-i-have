@@ -12,6 +12,13 @@ data:extend{
     default_value = false,
   },
   {
+    type = "bool-setting",
+    name = "widih-thin-window",
+    setting_type = "runtime-per-user",
+    default_value = false,
+    hidden = true
+  },
+  {
     type = "string-setting",
     name = "widih-search-location",
     setting_type = "runtime-per-user",

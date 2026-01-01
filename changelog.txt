@@ -2,6 +2,7 @@
 Version: 1.3.0
 Date: ????
   Features:
+    - Highly anticipated thin mode that sits right above your guns and armor
     - Switching surfaces in remote view will search the new surface if the search location is remote view. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/7
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.15

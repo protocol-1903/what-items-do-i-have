@@ -1,8 +1,9 @@
 script.on_configuration_changed(function (event)
-  if not event.mod_changes["what-items-do-i-have"] then return end
+  -- if not event.mod_changes["what-items-do-i-have"] then return end
   -- when the mod version changes, delete the UI so it's recreated from the ground up (in case anything changes)
   for _, player in pairs(game.players) do
     if player.gui.screen["widih-window"] then player.gui.screen["widih-window"].destroy() end
+    if player.gui.screen["widih-thin-window"] then player.gui.screen["widih-thin-window"].destroy() end
   end
 end)
 
@@ -12,197 +13,346 @@ end
 
 local function show_gui(player_index)
   if not player_index then return end
-  local window = game.get_player(player_index).gui.screen["widih-window"]
-  if not window then return end
-  window.visible = true
-  window.bring_to_front()
-  window.focus()
+  if game.get_player(player_index).mod_settings["widih-thin-window"].value then
+    local window = game.get_player(player_index).gui.center["widih-thin-window"]
+    if not window then return end
+    window.visible = true
+  else
+    local window = game.get_player(player_index).gui.screen["widih-window"]
+    if not window then return end
+    window.visible = true
+    window.bring_to_front()
+    window.focus()
+  end
 end
 
-local function  hide_gui(player_index)
+local function hide_gui(player_index)
   if not player_index then return end
-  local window = game.get_player(player_index).gui.screen["widih-window"]
-  if not window then return end
-  window.visible = false
+  if game.get_player(player_index).mod_settings["widih-thin-window"].value then
+    local window = game.get_player(player_index).gui.center["widih-thin-window"]
+    if not window then return end
+    window.visible = false
+  else
+    local window = game.get_player(player_index).gui.screen["widih-window"]
+    if not window then return end
+    window.visible = false
+  end
 end
+
+local item_tooltip = "widih-window.button-tooltip" .. (script.feature_flags.quality and "-quality" or "")
 
 local function update_gui(player_index, tabledata, network, label)
   if not player_index then return end
 
   local player = game.get_player(player_index)
-
+  
   local window = player.gui.screen["widih-window"]
+  local thin_window = player.gui.center["widih-thin-window"]
+  local content -- area for search data to go
 
-  -- if window content does not exist (mod version change or fresh install)
-  if not window then
-    -- create new window
-    window = player.gui.screen.add{
-      type = "frame",
-      name = "widih-window",
-      direction = "horizontal",
-      style = "invisible_frame"
-    } -- hide, initially
-    window.visible = false
+  -- thin window above ammo n armor
+  if player.mod_settings["widih-thin-window"].value then
+    -- if window content does not exist (mod version change or fresh install)
+    if not thin_window then
+      network = nil
+      thin_window = player.gui.center.add {
+        type = "frame",
+        name = "widih-thin-window",
+        direction = "vertical",
+        style = "invisible_frame",
+        index = 1
+      }
 
-    window.add{
-      type = "frame",
-      name = "main",
-      direction = "vertical"
-    }.drag_target = window
+      thin_window.style.height = 888
+      thin_window.style.width = 892
 
-    window.add{
-      type = "frame",
-      name = "settings",
-      direction = "vertical"
-    }.drag_target = window
-    window.settings.visible = false
+      local bezel = thin_window.add {type = "empty-widget"}
+      bezel.style.vertically_stretchable = true
+      bezel.style.height = 808
 
-    window.settings.add{
-      type = "flow",
-      name = "titlebar",
-      direction = "horizontal"
-    }.drag_target = window
+      thin_window = thin_window.add {
+        type = "frame",
+        name = "main",
+        direction = "vertical"
+      }
+      thin_window.style.padding = 4
+      thin_window.style.width = 188
+      thin_window.style.height = 80
 
-    window.settings.titlebar.add{
-      type = "label",
-      style = "frame_title",
-      caption = {"widih-window.settings"}
-    }.drag_target = window
+      -- main content
+      thin_window.add{
+        type = "flow",
+        name = "titlebar",
+        direction = "horizontal"
+      }.style.natural_width = 180
+      thin_window.titlebar.add{
+        type = "label",
+        name = "label",
+        style = "caption_label",
+        caption = label or {"widih-network.nil"}
+      }
+      thin_window.titlebar.label.style.top_padding = -2
 
-    -- drag space thingy
-    local header = window.settings.titlebar.add{
-      type = "empty-widget",
-      style = "draggable_space_header"
-    }
+      -- drag space thingy
+      local header = thin_window.titlebar.add{
+        type = "empty-widget",
+        style = "draggable_space_header"
+      }
 
-    header.style.horizontally_stretchable = true
-    header.style.natural_height = 24
-    header.style.height = 24
-    header.style.right_margin = 4
-    header.drag_target = window
+      header.style.horizontally_stretchable = true
+      header.style.height = 14
+      header.style.right_margin = 4
 
-    window.settings.titlebar.add{
-      type = "sprite-button",
-      name = "settings-close",
-      style = "close_button",
-      sprite = "utility/close",
-      tooltip = { "widih-window.close-tooltip" }
-    }
+      thin_window.titlebar.add{
+        type = "sprite-button",
+        name = "pin",
+        style = "frame_action_button",
+        sprite = "widih-pin-white",
+        hovered_sprite = "widih-pin-black",
+        clicked_sprite = "widih-pin-black",
+        toggled = true,
+        tooltip = {"widih-window.unpin-tooltip"}
+      }.style.size = 14
 
-    -- main content
-    window.settings.add{
-      type = "frame",
-      name = "sub",
-      direction = "vertical",
-      style = "inside_shallow_frame_with_padding_and_vertical_spacing"
-    }.style.horizontal_align = "right"
+      thin_window.titlebar.add{
+        type = "sprite-button",
+        name = "main-close",
+        style = "frame_action_button",
+        sprite = "utility/close",
+        tooltip = { "widih-window.close-tooltip" }
+      }.style.size = 14
 
-    window.settings.sub.add{
-      type = "label",
-      caption = {"mod-setting-name.widih-search-location"}
-    }
+      -- -- main content
+      thin_window.add{
+        type = "frame",
+        name = "sub",
+        direction = "horizontal",
+        style = "inside_shallow_frame_with_padding_and_vertical_spacing"
+      }
+      thin_window.sub.style.top_padding = 8
+      thin_window.sub.style.bottom_padding = 8
+      thin_window.sub.style.left_padding = 6
+      thin_window.sub.style.right_padding = 6
 
-    window.settings.sub.add{
-      type = "drop-down",
-      name = "search-location",
-      items = {
-        {"string-mod-setting-name.local-search"},
-        {"string-mod-setting-name.remote-search"}
-      },
-      selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
-    }
+      -- labels, only show if required and one at a time
+      thin_window.sub.add{
+        type = "label",
+        name = "error-no-network",
+        caption = {"widih-window.error-no-network"}
+      }
 
-    window.settings.sub.add{
-      type = "checkbox",
-      name = "show-surface",
-      state = player.mod_settings["widih-show-surface"].value,
-      caption = {"mod-setting-name.widih-show-surface"}
-    }
+      thin_window.sub.add{
+        type = "label",
+        name = "error-bad-entity",
+        caption = {"widih-window.error-bad-entity"}
+      }
 
-    window.settings.sub.add{
-      type = "checkbox",
-      name = "auto-hide",
-      state = player.mod_settings["widih-auto-hide"].value,
-      caption = {"mod-setting-name.widih-auto-hide"}
-    }
+      thin_window.sub.add{
+        type = "sprite",
+        name = "item",
+        resize_to_sprite = false
+      }
+      thin_window.sub.item.style.size = 22
 
-    window.main.add{
-      type = "flow",
-      name = "titlebar",
-      direction = "horizontal"
-    }.style.natural_width = 180
-    window.main.titlebar.drag_target = window
-    window.main.titlebar.add{
-      type = "label",
-      name = "label",
-      style = "frame_title",
-      caption = label or {"widih-network.nil"}
-    }.drag_target = window
+      thin_window.sub.add{
+        type = "table",
+        name = "table",
+        column_count = 5
+      }.style.horizontal_spacing = 6
+    else
+      thin_window.visible = true
+      thin_window.main.titlebar.label.caption = label or thin_window.main.titlebar.caption
+      thin_window = thin_window.main
+    end
+    content = thin_window.sub
+    if window then
+      window.visible = false
+    end
+  else
+    -- if window content does not exist (mod version change or fresh install)
+    if not window then
+      -- create new window
+      window = player.gui.screen.add{
+        type = "frame",
+        name = "widih-window",
+        direction = "horizontal",
+        style = "invisible_frame"
+      } -- hide, initially
+      window.visible = false
 
-    -- drag space thingy
-    header = window.main.titlebar.add{
-      type = "empty-widget",
-      style = "draggable_space_header"
-    }
+      window.add{
+        type = "frame",
+        name = "main",
+        direction = "vertical"
+      }.drag_target = window
 
-    header.style.horizontally_stretchable = true
-    header.style.natural_height = 24
-    header.style.height = 24
-    header.style.right_margin = 4
-    header.drag_target = window
+      window.add{
+        type = "frame",
+        name = "settings",
+        direction = "vertical"
+      }.drag_target = window
+      window.settings.visible = false
 
-    window.main.titlebar.add{
-      type = "sprite-button",
-      name = "settings",
-      style = "frame_action_button",
-      sprite = "widih-gear-white",
-      hovered_sprite = "widih-gear-black",
-      clicked_sprite = "widih-gear-black",
-      tooltip = {"widih-window.settings-tooltip"}
-    }
+      window.settings.add{
+        type = "flow",
+        name = "titlebar",
+        direction = "horizontal"
+      }.drag_target = window
 
-    window.main.titlebar.add{
-      type = "sprite-button",
-      name = "main-close",
-      style = "close_button",
-      sprite = "utility/close",
-      tooltip = { "widih-window.close-tooltip" }
-    }
+      window.settings.titlebar.add{
+        type = "label",
+        style = "frame_title",
+        caption = {"widih-window.settings"}
+      }.drag_target = window
 
-    -- main content
-    window.main.add{
-      type = "frame",
-      name = "sub",
-      direction = "vertical",
-      style = "inside_shallow_frame_with_padding_and_vertical_spacing"
-    }
+      -- drag space thingy
+      local header = window.settings.titlebar.add{
+        type = "empty-widget",
+        style = "draggable_space_header"
+      }
 
-    -- labels, only show if required and one at a time
-    window.main.sub.add{
-      type = "label",
-      name = "error-no-network",
-      caption = {"widih-window.error-no-network"}
-    }
+      header.style.horizontally_stretchable = true
+      header.style.natural_height = 24
+      header.style.height = 24
+      header.style.right_margin = 4
+      header.drag_target = window
 
-    window.main.sub.add{
-      type = "label",
-      name = "error-bad-entity",
-      caption = {"widih-window.error-bad-entity"}
-    }
+      window.settings.titlebar.add{
+        type = "sprite-button",
+        name = "settings-close",
+        style = "frame_action_button",
+        sprite = "utility/close",
+        tooltip = { "widih-window.close-tooltip" }
+      }
 
-    window.main.sub.add{
-      type = "table",
-      name = "table",
-      column_count = 5
-    }.style.horizontal_spacing = 5
-  else -- update things, they may have changed
-    window.main.titlebar.label.caption = label or window.main.titlebar.caption
-    window.settings.sub["search-location"].selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
-    window.settings.sub["show-surface"].state = player.mod_settings["widih-show-surface"].value
-    window.settings.sub["auto-hide"].state = player.mod_settings["widih-auto-hide"].value
+      -- main content
+      window.settings.add{
+        type = "frame",
+        name = "sub",
+        direction = "vertical",
+        style = "inside_shallow_frame_with_padding_and_vertical_spacing"
+      }.style.horizontal_align = "right"
+
+      window.settings.sub.add{
+        type = "label",
+        caption = {"mod-setting-name.widih-search-location"}
+      }
+
+      window.settings.sub.add{
+        type = "drop-down",
+        name = "search-location",
+        items = {
+          {"string-mod-setting-name.local-search"},
+          {"string-mod-setting-name.remote-search"}
+        },
+        selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
+      }
+
+      window.settings.sub.add{
+        type = "checkbox",
+        name = "show-surface",
+        state = player.mod_settings["widih-show-surface"].value,
+        caption = {"mod-setting-name.widih-show-surface"}
+      }
+
+      window.settings.sub.add{
+        type = "checkbox",
+        name = "auto-hide",
+        state = player.mod_settings["widih-auto-hide"].value,
+        caption = {"mod-setting-name.widih-auto-hide"}
+      }
+
+      window.main.add{
+        type = "flow",
+        name = "titlebar",
+        direction = "horizontal"
+      }.style.natural_width = 180
+      window.main.titlebar.drag_target = window
+      window.main.titlebar.add{
+        type = "label",
+        name = "label",
+        style = "frame_title",
+        caption = label or {"widih-network.nil"}
+      }.drag_target = window
+
+      -- drag space thingy
+      header = window.main.titlebar.add{
+        type = "empty-widget",
+        style = "draggable_space_header"
+      }
+
+      header.style.horizontally_stretchable = true
+      header.style.natural_height = 24
+      header.style.height = 24
+      header.style.right_margin = 4
+      header.drag_target = window
+
+      window.main.titlebar.add{
+        type = "sprite-button",
+        name = "pin",
+        style = "frame_action_button",
+        sprite = "widih-pin-white",
+        hovered_sprite = "widih-pin-black",
+        clicked_sprite = "widih-pin-black",
+        tooltip = {"widih-window.pin-tooltip"}
+      }
+
+      window.main.titlebar.add{
+        type = "sprite-button",
+        name = "settings",
+        style = "frame_action_button",
+        sprite = "widih-gear-white",
+        hovered_sprite = "widih-gear-black",
+        clicked_sprite = "widih-gear-black",
+        tooltip = {"widih-window.settings-tooltip"}
+      }
+
+      window.main.titlebar.add{
+        type = "sprite-button",
+        name = "main-close",
+        style = "frame_action_button",
+        sprite = "utility/close",
+        tooltip = { "widih-window.close-tooltip" }
+      }
+
+      -- main content
+      window.main.add{
+        type = "frame",
+        name = "sub",
+        direction = "vertical",
+        style = "inside_shallow_frame_with_padding_and_vertical_spacing"
+      }
+
+      -- labels, only show if required and one at a time
+      window.main.sub.add{
+        type = "label",
+        name = "error-no-network",
+        caption = {"widih-window.error-no-network"}
+      }
+
+      window.main.sub.add{
+        type = "label",
+        name = "error-bad-entity",
+        caption = {"widih-window.error-bad-entity"}
+      }
+
+      window.main.sub.add{
+        type = "table",
+        name = "table",
+        column_count = 5
+      }.style.horizontal_spacing = 5
+    else -- update things, they may have changed
+      window.visible = true
+      window.main.titlebar.label.caption = label or window.main.titlebar.caption
+      window.settings.sub["search-location"].selected_index = player.mod_settings["widih-search-location"].value == "local-search" and 1 or 2
+      window.settings.sub["show-surface"].state = player.mod_settings["widih-show-surface"].value
+      window.settings.sub["auto-hide"].state = player.mod_settings["widih-auto-hide"].value
+    end
+    content = window.main.sub
+    if thin_window then
+      thin_window.visible = false
+    end
   end
-
-  local content = window.main.sub
 
   if not network then
     -- no logistic network has been found, or player does not have the right technologies unlocked
@@ -223,8 +373,29 @@ local function update_gui(player_index, tabledata, network, label)
     -- reset table
     content.table.clear()
 
-    for _, guielement in pairs(tabledata) do
-      content.table.add(guielement)
+    if player.mod_settings["widih-thin-window"].value then
+      content.item.sprite = "item." .. tabledata[1].item
+      for i, itemdata in pairs(tabledata) do
+        if i > 5 then break end
+        local sprite = content.table.add {
+          type = "sprite-button",
+          sprite = "quality." .. itemdata.quality,
+          number = itemdata.count,
+          tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}},
+          resize_to_sprite = false
+        }
+        sprite.style.size = 22
+      end
+    else
+      for _, itemdata in pairs(tabledata) do
+        content.table.add {
+          type = "sprite-button",
+          sprite = "item." .. itemdata.item,
+          quality = itemdata.quality,
+          number = itemdata.count,
+          tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}}
+        }
+      end
     end
   end
 end
@@ -266,17 +437,14 @@ local function search(item, player_index)
     -- find quality items in network
     for quality in pairs(prototypes.quality) do
       if quality ~= "quality-unknown" then
-        local count = network.get_item_count{
-          name = item,
-          quality = quality
-        }
         -- just shove the following into the table when required
         tabledata[#tabledata+1] = {
-          type = "sprite-button",
-          sprite = "item." .. item,
+          item = item,
           quality = quality,
-          number = count,
-          tooltip = {"widih-window.button-tooltip" .. (script.feature_flags.quality and "-quality" or ""), {"?", {"entity-name." .. item}, {"item-name." .. item}}, count, {"quality-name." .. quality}}
+          count = network.get_item_count{
+            name = item,
+            quality = quality
+          }
         }
       end
     end
@@ -293,12 +461,12 @@ script.on_event(defines.events.on_gui_click, function (event)
   local player = game.get_player(event.player_index)
 
   local window = player.gui.screen["widih-window"]
+  local thin_window = player.gui.screen["widih-thin-window"]
 
   if event.element.name == "main-close" then
     hide_gui(player.index)
   elseif event.element.name == "settings-close" then
     window.settings.visible = false
-    window.main.titlebar.settings.toggled = false
   elseif event.element.name == "settings" then
     local open = not window.settings.visible
     window.settings.visible = open
@@ -307,6 +475,9 @@ script.on_event(defines.events.on_gui_click, function (event)
     player.mod_settings["widih-show-surface"] = {value = event.element.state}
   elseif event.element.name == "auto-hide" then
     player.mod_settings["widih-auto-hide"] = {value = event.element.state}
+  elseif event.element.name == "pin" then
+    player.mod_settings["widih-thin-window"] = {value = not player.mod_settings["widih-thin-window"].value}
+    update_gui(player.index, {}, true)
   elseif event.element.type == "sprite-button" then
     if player.clear_cursor() then
       player.cursor_ghost = {
