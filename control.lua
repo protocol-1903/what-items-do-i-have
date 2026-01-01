@@ -317,15 +317,20 @@ script.on_event(defines.events.on_gui_click, function (event)
   end
 end)
 
+-- update GUI when search location changes
 script.on_event(defines.events.on_gui_selection_state_changed, function (event)
-
   if event.element.get_mod() ~= "what-items-do-i-have" then return end
   
   local player = game.get_player(event.player_index)
-
   player.mod_settings["widih-search-location"] = {value = event.element.selected_index == 1 and "local-search" or "remote-search"}
 
   search({}, player.index)
+end)
+
+-- update GUI when player changes remote view (not to/from remote view)
+---@param event EventData.on_player_changed_surface
+script.on_event(defines.events.on_player_changed_surface, function (event)
+  search({}, event.player_index)
 end)
 
 -- update the GUI when mod settings change
