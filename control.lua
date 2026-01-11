@@ -1,9 +1,10 @@
 script.on_configuration_changed(function (event)
-  -- if not event.mod_changes["what-items-do-i-have"] then return end
+  if not event.mod_changes["what-items-do-i-have"] then return end
   -- when the mod version changes, delete the UI so it's recreated from the ground up (in case anything changes)
   for _, player in pairs(game.players) do
     if player.gui.screen["widih-window"] then player.gui.screen["widih-window"].destroy() end
     if player.gui.screen["widih-thin-window"] then player.gui.screen["widih-thin-window"].destroy() end
+    player.mod_settings["widih-thin-window"].value = false
   end
 end)
 
