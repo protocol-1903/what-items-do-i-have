@@ -4,6 +4,10 @@ Date: ????
   Changes:
     - Thin window mode will be disabled when the mod is updated to prevent internal structure issues
     - Fixed that windows would be cleared regardless of if this mod's version had changed.
+    - Fixed that switching modes would clear title
+    - Fixed that thin window was not moveable
+    - Fixed that thin window mode would crash if a quality was clicked. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/10
+    - Fixed a crash when changing surfaces. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/9
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
 Date: 2025-12-31
