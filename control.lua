@@ -336,6 +336,14 @@ local function update_gui(player_index, tabledata, network, label)
     }.style.horizontal_spacing = 6
   end
 
+  -- reset location if out of bounds
+  if window.location.x >= player.display_resolution.width - 100 or window.location.y >= player.display_resolution.height - 100 then
+    window.location = {0, 0}
+  end
+  if thin_window.location.x >= player.display_resolution.width - 100 or thin_window.location.y >= player.display_resolution.height - 100 then
+    thin_window.location = {0, 0}
+  end
+
   if label then -- new search location
     window.main.titlebar.label.caption = label
     thin_window.titlebar.label.caption = label

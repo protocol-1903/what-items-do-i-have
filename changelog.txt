@@ -10,6 +10,7 @@ Date: ????
     - Fixed that thin window mode would crash if a quality was clicked. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/10
     - Fixed a crash when changing surfaces. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/9
     - Fixed that the GUI would update when switching surfaces even if no data is present
+    - Fixed that windows could disappear out of bounds and not reappear until the mod was updated
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
 Date: 2025-12-31
