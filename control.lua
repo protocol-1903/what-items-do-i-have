@@ -63,6 +63,8 @@ local function update_gui(player_index, tabledata, network, label)
   local thin_window = player.gui.screen["widih-thin-window"]
   local content -- area for search data to go, table or table + icon for item
 
+  if not window and #tabledata == 0 then return end
+
   -- if window content does not exist (mod version change or fresh install)
   if not window then
     -- create new window
@@ -471,7 +473,6 @@ script.on_event(defines.events.on_gui_click, function (event)
   local player = game.get_player(event.player_index)
 
   local window = player.gui.screen["widih-window"]
-  local thin_window = player.gui.screen["widih-thin-window"]
 
   if event.element.name == "main-close" then
     hide_gui(player.index)
