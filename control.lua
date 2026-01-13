@@ -18,6 +18,20 @@ local function get_location(surface)
   return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
 end
 
+local function calculate_location(index)
+  local player = game.get_player(index)
+
+  local height = 96 * player.display_scale
+  local width = 468 * player.display_scale
+  local offset = 24 * player.display_scale
+  local frame_width = 188 * player.display_scale
+  local frame_height = 80 * player.display_scale
+  return {
+    player.display_resolution.width / 2 - width / 2 - offset - frame_width,
+    player.display_resolution.height - height - frame_height
+  }
+end
+
 local function show_gui(player_index)
   if not player_index then return end
   if game.get_player(player_index).mod_settings["widih-thin-window"].value then
@@ -248,6 +262,7 @@ local function update_gui(player_index, tabledata, network, label)
     thin_window.style.padding = 4
     thin_window.style.width = 188
     thin_window.style.height = 80
+    thin_window.location = calculate_location(player.index)
 
     -- main content
     thin_window.add{
@@ -341,7 +356,7 @@ local function update_gui(player_index, tabledata, network, label)
     window.location = {0, 0}
   end
   if thin_window.location.x >= player.display_resolution.width - 100 or thin_window.location.y >= player.display_resolution.height - 100 then
-    thin_window.location = {0, 0}
+    thin_window.location = calculate_location(player.index)
   end
 
   if label then -- new search location
