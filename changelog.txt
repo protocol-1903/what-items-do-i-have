@@ -2,6 +2,7 @@
 Version: 1.3.1
 Date: ????
   Features:
+    - Added a setting to sort from high to low quality level instead of low to high
     - Added a setting to ignore qualities that have no items of that quality
   Changes:
     - Thin window mode will be disabled when the mod is updated to prevent internal structure issues

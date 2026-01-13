@@ -179,6 +179,13 @@ local function update_gui(player_index, tabledata, network, label)
       caption = {"mod-setting-name.widih-ignore-zero-count"}
     }
 
+    window.settings.sub.add{
+      type = "checkbox",
+      name = "invert-sort",
+      state = player.mod_settings["widih-invert-sort"].value,
+      caption = {"mod-setting-name.widih-invert-sort"}
+    }
+
     window.main.add{
       type = "flow",
       name = "titlebar",
@@ -410,11 +417,14 @@ local function update_gui(player_index, tabledata, network, label)
 
     content.table.clear()
 
+    local invert = player.mod_settings["widih-invert-sort"].value
+
     if thin_mode then
       content.item.sprite = "item." .. tabledata[1].item
-      local i = 1
-      for _, itemdata in pairs(tabledata) do
-        if i > 5 then break end
+      local counted = 0
+      for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
+        local itemdata = tabledata[i]
+        if counted == 5 then break end
         if prototypes.quality[itemdata.quality] and (not player.mod_settings["widih-ignore-zero-count"].value or itemdata.count > 0) then
           content.table.add {
             type = "sprite-button",
@@ -423,11 +433,12 @@ local function update_gui(player_index, tabledata, network, label)
             tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}},
             resize_to_sprite = false
           }.style.size = 22
-          i = i + 1
+          counted = counted + 1
         end
       end
     else
-      for _, itemdata in pairs(tabledata) do
+      for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
+        local itemdata = tabledata[i]
         if prototypes.quality[itemdata.quality] and (not player.mod_settings["widih-ignore-zero-count"].value or itemdata.count > 0) then
           content.table.add {
             type = "sprite-button",
@@ -520,6 +531,8 @@ script.on_event(defines.events.on_gui_click, function (event)
     player.mod_settings["widih-auto-hide"] = {value = event.element.state}
   elseif event.element.name == "ignore-zero-count" then
     player.mod_settings["widih-ignore-zero-count"] = {value = event.element.state}
+  elseif event.element.name == "invert-sort" then
+    player.mod_settings["widih-invert-sort"] = {value = event.element.state}
   elseif event.element.name == "pin" then
     player.mod_settings["widih-thin-window"] = {value = not player.mod_settings["widih-thin-window"].value}
   elseif event.element.type == "sprite-button" then

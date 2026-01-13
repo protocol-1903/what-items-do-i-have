@@ -25,6 +25,12 @@ data:extend{
     default_value = false
   },
   {
+    type = "bool-setting",
+    name = "widih-invert-sort",
+    setting_type = "runtime-per-user",
+    default_value = false
+  },
+  {
     type = "string-setting",
     name = "widih-search-location",
     setting_type = "runtime-per-user",
