@@ -19,6 +19,12 @@ data:extend{
     hidden = true
   },
   {
+    type = "bool-setting",
+    name = "widih-ignore-zero-count",
+    setting_type = "runtime-per-user",
+    default_value = false
+  },
+  {
     type = "string-setting",
     name = "widih-search-location",
     setting_type = "runtime-per-user",
