@@ -15,7 +15,7 @@ defines.content_visibility = {
 }
 
 local function get_location(surface)
-  return surface.localised_name or (surface.platform or {}).name or script.active_mods["space-exploration"] and surface.name or {"space-location-name." .. surface.name}
+  return surface.localised_name or (surface.platform or {}).name or "unknown location"
 end
 
 local function calculate_location(index)
@@ -517,17 +517,10 @@ script.on_event(defines.events.on_gui_click, function (event)
     player.mod_settings["widih-thin-window"] = {value = not player.mod_settings["widih-thin-window"].value}
   elseif event.element.type == "sprite-button" then
     if player.clear_cursor() then
-      if player.mod_settings["widih-thin-window"].value then
-        player.cursor_ghost = {
-          name = event.element.parent.parent.item.sprite:sub(6),
-          quality = event.element.sprite:sub(9)
-        }
-      else
-        player.cursor_ghost = {
-          name = event.element.sprite:sub(6),
-          quality = event.element.quality
-        }
-      end
+      player.cursor_ghost = {
+        name = event.element.sprite:sub(6),
+        quality = event.element.quality
+      }
     end
   end
 end)
