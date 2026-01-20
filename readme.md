@@ -17,4 +17,6 @@ Icons borrowed from [flib](https://mods.factorio.com/mod/flib)
 
 Requested by Tinyboss on the factorio forums, showcase by Factorio Mod Tips on YouTube.
 
+Thumbnail by [Mr.SmoothieHuman](https://mods.factorio.com/user/Mr.SmoothieHuman)
+
 If you have a mod idea, let me know and I can look into it.
