@@ -606,7 +606,10 @@ end)
 script.on_event("widih-search-network", function(event)
   local prototype = event.selected_prototype
 
-  if not prototype then return end
+  if not prototype then
+    hide_gui(event.player_index)
+    return
+  end
 
   -- get item
   local item = prototype.base_type == "item" and not prototypes.item[prototype.name].has_flag("spawnable") and prototype.name or
