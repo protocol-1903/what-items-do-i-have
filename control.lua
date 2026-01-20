@@ -333,10 +333,10 @@ local function update_gui(player_index, tabledata, network, label)
       direction = "horizontal",
       style = "inside_shallow_frame_with_padding_and_vertical_spacing"
     }
-    thin_window.sub.style.top_padding = 8
-    thin_window.sub.style.bottom_padding = 8
-    thin_window.sub.style.left_padding = 6
-    thin_window.sub.style.right_padding = 6
+    thin_window.sub.style.top_padding = 3
+    thin_window.sub.style.bottom_padding = 3
+    thin_window.sub.style.left_padding = 3
+    thin_window.sub.style.right_padding = 3
 
     -- labels, only show if required and one at a time
     thin_window.sub.add{
@@ -352,17 +352,10 @@ local function update_gui(player_index, tabledata, network, label)
     }
 
     thin_window.sub.add{
-      type = "sprite",
-      name = "item",
-      resize_to_sprite = false
-    }
-    thin_window.sub.item.style.size = 22
-
-    thin_window.sub.add{
       type = "table",
       name = "table",
       column_count = 5
-    }.style.horizontal_spacing = 6
+    }.style.horizontal_spacing = 2
   end
 
   -- reset location if out of bounds
@@ -418,36 +411,23 @@ local function update_gui(player_index, tabledata, network, label)
     content.table.clear()
 
     local invert = player.mod_settings["widih-invert-sort"].value
+    local include_zero = not player.mod_settings["widih-ignore-zero-count"].value
 
-    if thin_mode then
-      content.item.sprite = "item." .. tabledata[1].item
-      local counted = 0
-      for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
-        local itemdata = tabledata[i]
-        if counted == 5 then break end
-        if prototypes.quality[itemdata.quality] and (not player.mod_settings["widih-ignore-zero-count"].value or itemdata.count > 0) then
-          content.table.add {
-            type = "sprite-button",
-            sprite = "quality." .. itemdata.quality,
-            number = itemdata.count,
-            tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}},
-            resize_to_sprite = false
-          }.style.size = 22
-          counted = counted + 1
-        end
-      end
-    else
-      for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
-        local itemdata = tabledata[i]
-        if prototypes.quality[itemdata.quality] and (not player.mod_settings["widih-ignore-zero-count"].value or itemdata.count > 0) then
-          content.table.add {
-            type = "sprite-button",
-            sprite = "item." .. itemdata.item,
-            quality = itemdata.quality,
-            number = itemdata.count,
-            tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}}
-          }
-        end
+    local max_render_count = thin_mode and 5 or 10
+    local counted = 0
+    for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
+      local itemdata = tabledata[i]
+      if counted == max_render_count then break end
+      if prototypes.quality[itemdata.quality] and (include_zero or itemdata.count > 0) then
+        content.table.add {
+          type = "sprite-button",
+          sprite = "item." .. itemdata.item,
+          quality = itemdata.quality,
+          number = itemdata.count,
+          tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}},
+          resize_to_sprite = false
+        }.style.size = thin_mode and 32 or 40
+        counted = counted + 1
       end
     end
   end
