@@ -447,7 +447,7 @@ local function update_gui(player_index, tabledata, network, label)
     local invert = player.mod_settings["widih-invert-sort"].value
     local include_zero = not player.mod_settings["widih-ignore-zero-count"].value
 
-    local max_render_count = thin_mode and 5 or 10
+    local max_render_count = thin_mode and 5 or -1
     local counted = 0
     for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
       local itemdata = tabledata[i]
