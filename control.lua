@@ -69,6 +69,40 @@ end
 
 local item_tooltip = "widih-window.button-tooltip" .. (script.feature_flags.quality and "-quality" or "")
 
+-- shifted forward by 1 so we can use int based arrays and not string based dictionaries
+local int_to_hex = {
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F"
+}
+
+local quality_hex = {}
+for q, quality in pairs(prototypes.quality) do
+  local hex = "#"
+  for _, int in pairs{
+    math.floor(quality.color.r * 255),
+    math.floor(quality.color.g * 255),
+    math.floor(quality.color.b * 255)
+  } do
+    local msb = math.floor(int / 16)
+    hex = hex .. int_to_hex[msb + 1] .. int_to_hex[int - msb * 16 + 1]
+  end
+  quality_hex[q] = hex
+end
+
 local function update_gui(player_index, tabledata, network, label)
   if not player_index then return end
 
@@ -424,7 +458,7 @@ local function update_gui(player_index, tabledata, network, label)
           sprite = "item." .. itemdata.item,
           quality = itemdata.quality,
           number = itemdata.count,
-          tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}},
+          tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}, quality_hex[itemdata.quality]},
           resize_to_sprite = false
         }.style.size = thin_mode and 32 or 40
         counted = counted + 1
