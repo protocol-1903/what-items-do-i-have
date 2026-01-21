@@ -15,7 +15,7 @@ defines.content_visibility = {
 }
 
 local function get_location(surface)
-  return surface.localised_name or (surface.platform or {}).name or "unknown location"
+  return surface.localised_name or (surface.platform or {}).name or {"space-location-name." .. surface.name}
 end
 
 local function calculate_location(index)
