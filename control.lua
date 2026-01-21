@@ -559,6 +559,18 @@ script.on_event(defines.events.on_gui_click, function (event)
   end
 end)
 
+---@param event EventData.CustomInputEvent
+script.on_event("widih-pipette", function (event)
+  if not event.element or event.element.get_mod() ~= "what-items-do-i-have" then return end
+  local player = game.get_player(event.player_index)
+    if player.clear_cursor() then
+      player.cursor_ghost = {
+        name = event.element.sprite:sub(6),
+        quality = event.element.quality
+      }
+    end
+end)
+
 -- update GUI when search location changes
 script.on_event(defines.events.on_gui_selection_state_changed, function (event)
   if event.element.get_mod() ~= "what-items-do-i-have" then return end

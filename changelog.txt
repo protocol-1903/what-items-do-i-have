@@ -3,6 +3,7 @@ Version: 1.3.3
 Date: ????
   Features:
     - Tooltips will be shown in the color of the indicated quality
+    - Pipetting an icon puts an item of that quality into your cursor
   Changes:
     - Unified thin UI styling with main UI. Increased size of icons by 60%
     - Updated compatibility with space exploration surfaces

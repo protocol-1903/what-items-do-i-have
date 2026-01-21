@@ -2,6 +2,13 @@
 data:extend({
   {
     type = "custom-input",
+    name = "widih-pipette",
+    key_sequence = "",
+    linked_game_control = "pipette",
+    action = "lua"
+  },
+  {
+    type = "custom-input",
     name = "widih-search-network",
     key_sequence = "ALT + Z",
     action = "lua",
