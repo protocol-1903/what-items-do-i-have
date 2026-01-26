@@ -565,7 +565,7 @@ end)
 
 ---@param event EventData.CustomInputEvent
 script.on_event("widih-pipette", function (event)
-  if not event.element or event.element.get_mod() ~= "what-items-do-i-have" then return end
+  if not event.element or event.element.get_mod() ~= "what-items-do-i-have" or event.element.type ~= "sprite-button" or not event.element.quality then return end
   local player = game.get_player(event.player_index)
     if player.clear_cursor() then
       player.cursor_ghost = {
