@@ -6,6 +6,7 @@ Date: ????
   Bugfixes:
     - Fixed window auto opening when switching surfaces. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/14
     - Fixed crash when using pipette over the window. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/13
+    - Fixed missing locale on unpin button
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.3
 Date: 2026-01-20
