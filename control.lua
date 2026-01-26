@@ -34,16 +34,16 @@ end
 
 local function show_gui(player_index)
   if not player_index then return end
-  if game.get_player(player_index).mod_settings["widih-thin-window"].value then
-    local window = game.get_player(player_index).gui.screen["widih-thin-window"]
-    if not window then return end
-    window.visible = true
-  else
-    local window = game.get_player(player_index).gui.screen["widih-window"]
-    if not window then return end
-    window.visible = true
+  local window = game.get_player(player_index).gui.screen["widih-window"]
+  local thin_window = game.get_player(player_index).gui.screen["widih-thin-window"]
+  local thin_mode = game.get_player(player_index).mod_settings["widih-thin-window"].value
+  if window then
+    window.visible = not thin_mode
     window.bring_to_front()
-    window.focus()
+  end
+  if thin_window then
+    thin_window.visible = thin_mode
+    thin_window.bring_to_front()
   end
 end
 
@@ -311,6 +311,7 @@ local function update_gui(player_index, tabledata, network, label)
     thin_window.style.width = 188
     thin_window.style.height = 80
     thin_window.location = calculate_location(player.index)
+    thin_window.visible = false
 
     -- main content
     thin_window.add{
@@ -414,8 +415,11 @@ local function update_gui(player_index, tabledata, network, label)
 
   -- set visibility and find the proper content window
   content = thin_mode and thin_window.sub or window.main.sub
-  window.visible = not thin_mode
-  thin_window.visible = thin_mode
+
+  if window.visible or thin_window.visible then
+    window.visible = not thin_mode
+    thin_window.visible = thin_mode
+  end
 
   if not network then
     -- no logistic network has been found, or player does not have the right technologies unlocked
