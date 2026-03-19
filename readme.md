@@ -19,4 +19,5 @@ Requested by Tinyboss on the factorio forums, showcase by Factorio Mod Tips on Y
 
 Thumbnail by [Mr.SmoothieHuman](https://mods.factorio.com/user/Mr.SmoothieHuman)
 
+My mods are made 100% by humans, with no computer generated code or graphics.
 If you have a mod idea, let me know and I can look into it.
