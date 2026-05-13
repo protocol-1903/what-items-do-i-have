@@ -1,3 +1,4 @@
+---@param event ConfigurationChangedData
 script.on_configuration_changed(function (event)
   if not event.mod_changes["what-items-do-i-have"] then return end
   -- when the mod version changes, delete the UI so it's recreated from the ground up (in case anything changes)
@@ -8,18 +9,22 @@ script.on_configuration_changed(function (event)
   end
 end)
 
+---@enum defines.content_visibility
 defines.content_visibility = {
   valid_data = 0,
   error_no_network = 1,
   error_bad_item = 2,
 }
 
+---@param surface LuaSurface
+---@return LocalisedString|string
 local function get_location(surface)
   return surface.localised_name or (surface.platform or {}).name or {"space-location-name." .. surface.name}
 end
 
-local function calculate_location(index)
-  local player = game.get_player(index)
+---@param player_index uint
+local function calculate_location(player_index)
+  local player = game.get_player(player_index)
 
   local height = 96 * player.display_scale
   local width = 468 * player.display_scale
@@ -32,6 +37,7 @@ local function calculate_location(index)
   }
 end
 
+---@param player_index uint
 local function show_gui(player_index)
   if not player_index then return end
   local window = game.get_player(player_index).gui.screen["widih-window"]
@@ -47,6 +53,7 @@ local function show_gui(player_index)
   end
 end
 
+---@param player_index uint
 local function hide_gui(player_index)
   if not player_index then return end
   if game.get_player(player_index).mod_settings["widih-thin-window"].value then
@@ -60,6 +67,8 @@ local function hide_gui(player_index)
   end
 end
 
+---@param content LuaGuiElement
+---@param status defines.content_visibility
 local function set_status(content, status)
   content["error-no-network"].visible = status == defines.content_visibility.error_no_network
   content["error-bad-entity"].visible = status == defines.content_visibility.error_bad_item
@@ -103,7 +112,11 @@ for q, quality in pairs(prototypes.quality) do
   quality_hex[q] = hex
 end
 
-local function update_gui(player_index, tabledata, network, label)
+---@param player_index uint
+---@param search_data ItemWithQualityCount[]
+---@param network LuaLogisticNetwork
+---@param label LocalisedString|string
+local function update_gui(player_index, search_data, network, label)
   if not player_index then return end
 
   local player = game.get_player(player_index)
@@ -111,7 +124,7 @@ local function update_gui(player_index, tabledata, network, label)
   local thin_window = player.gui.screen["widih-thin-window"]
   local content -- area for search data to go, table or table + icon for item
 
-  if not window and #tabledata == 0 then return end
+  if not window and #search_data == 0 then return end
 
   -- if window content does not exist (mod version change or fresh install)
   if not window then
@@ -424,7 +437,7 @@ local function update_gui(player_index, tabledata, network, label)
   if not network then
     -- no logistic network has been found, or player does not have the right technologies unlocked
     set_status(content, defines.content_visibility.error_no_network)
-  elseif not tabledata then
+  elseif not search_data then
     -- invalid entity/no item found
     set_status(content, defines.content_visibility.error_bad_item)
   else
@@ -432,15 +445,16 @@ local function update_gui(player_index, tabledata, network, label)
     set_status(content, defines.content_visibility.valid_data)
 
     local tags = window.tags or {}
-    if #tabledata ~= 0 then
+    if #search_data ~= 0 then
       -- new data, reset table
-      tags["widih-search-data"] = tabledata
+      tags["widih-search-data"] = search_data
       window.tags = tags
     else -- pull from storage, sometimes you just wanna update the gui
-      tabledata = tags["widih-search-data"]
+      search_data = tags["widih-search-data"]
+      ---@cast search_data ItemWithQualityCount[]
     end
 
-    if not tabledata or not prototypes.item[tabledata[1].item] then
+    if not search_data or not prototypes.item[search_data[1].item] then
       -- item does not exist
       set_status(content, defines.content_visibility.error_bad_item)
       return
@@ -453,16 +467,16 @@ local function update_gui(player_index, tabledata, network, label)
 
     local max_render_count = thin_mode and 5 or -1
     local counted = 0
-    for i = invert and #tabledata or 1, invert and 1 or #tabledata, invert and -1 or 1 do
-      local itemdata = tabledata[i]
+    for i = invert and #search_data or 1, invert and 1 or #search_data, invert and -1 or 1 do
+      local item_data = search_data[i]
       if counted == max_render_count then break end
-      if prototypes.quality[itemdata.quality] and (include_zero or itemdata.count > 0) then
+      if prototypes.quality[item_data.quality] and (include_zero or item_data.count > 0) then
         content.table.add {
           type = "sprite-button",
-          sprite = "item." .. itemdata.item,
-          quality = itemdata.quality,
-          number = itemdata.count,
-          tooltip = {item_tooltip, {"?", {"entity-name." .. itemdata.item}, {"item-name." .. itemdata.item}}, itemdata.count, {"quality-name." .. itemdata.quality}, quality_hex[itemdata.quality]},
+          sprite = "item." .. item_data.name,
+          quality = item_data.quality,
+          number = item_data.count,
+          tooltip = {item_tooltip, {"?", {"entity-name." .. item_data.name}, {"item-name." .. item_data.name}}, item_data.count, {"quality-name." .. item_data.quality}, quality_hex[item_data.quality]},
           resize_to_sprite = false
         }.style.size = thin_mode and 32 or 40
         counted = counted + 1
@@ -471,6 +485,8 @@ local function update_gui(player_index, tabledata, network, label)
   end
 end
 
+---@param player_index uint
+---@param item? ItemID
 local function search(player_index, item)
   if not player_index then return end
 
@@ -498,7 +514,8 @@ local function search(player_index, item)
     end
   end
 
-  local tabledata = {}
+  local search_data = {}
+  ---@cast search_data ItemWithQualityCount[]
   if type(item) == "table" then
     item = (((player.gui.screen["widih-window"] or {}).tags or {})["widih-search-data"] or {})[1].item
   end
@@ -511,8 +528,8 @@ local function search(player_index, item)
     for quality in pairs(prototypes.quality) do
       if quality ~= "quality-unknown" then
         -- just shove the following into the table when required
-        tabledata[#tabledata+1] = {
-          item = item,
+        search_data[#search_data+1] = {
+          name = item,
           quality = quality,
           count = network.get_item_count{
             name = item,
@@ -523,10 +540,11 @@ local function search(player_index, item)
     end
   end
 
-  update_gui(player.index, tabledata, network, label)
+  update_gui(player.index, search_data, network, label)
 end
 
 -- update gui events to reflect
+---@param event EventData.on_gui_click
 script.on_event(defines.events.on_gui_click, function (event)
 
   if event.element.get_mod() ~= "what-items-do-i-have" then return end
@@ -576,6 +594,7 @@ script.on_event("widih-pipette", function (event)
 end)
 
 -- update GUI when search location changes
+---@param event EventData.on_gui_selection_state_changed
 script.on_event(defines.events.on_gui_selection_state_changed, function (event)
   if event.element.get_mod() ~= "what-items-do-i-have" then return end
 
@@ -592,12 +611,14 @@ script.on_event(defines.events.on_player_changed_surface, function (event)
 end)
 
 -- update the GUI when mod settings change
+---@param event EventData.on_runtime_mod_setting_changed
 script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
   if event.setting_type == "runtime-per-user" and event.player_index then
     update_gui(event.player_index, {}, true)
   end
 end)
 
+---@param event EventData.CustomInputEvent
 script.on_event("widih-update-hand", function (event)
   game.get_player(event.player_index).set_shortcut_toggled(
     "widih-update-hand",
@@ -605,6 +626,7 @@ script.on_event("widih-update-hand", function (event)
   )
 end)
 
+---@param event EventData.CustomInputEvent
 script.on_event("widih-update-hover", function (event)
   game.get_player(event.player_index).set_shortcut_toggled(
     "widih-update-hover",
@@ -612,6 +634,7 @@ script.on_event("widih-update-hover", function (event)
   )
 end)
 
+---@param event EventData.on_lua_shortcut
 script.on_event(defines.events.on_lua_shortcut, function (event)
   if event.prototype_name == "widih-update-hand" then
     game.get_player(event.player_index).set_shortcut_toggled(
@@ -626,6 +649,7 @@ script.on_event(defines.events.on_lua_shortcut, function (event)
   end
 end)
 
+---@param event EventData.CustomInputEvent
 script.on_event("widih-search-network", function(event)
   local prototype = event.selected_prototype
 
@@ -644,6 +668,7 @@ script.on_event("widih-search-network", function(event)
 end)
 
 -- update on hand stack change
+---@param event EventData.on_player_cursor_stack_changed
 script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
   local player = game.get_player(event.player_index)
   -- only run if cursor is not empty and the shortcut is on
@@ -662,6 +687,7 @@ script.on_event(defines.events.on_player_cursor_stack_changed, function (event)
 end)
 
 -- update on hover
+---@param event EventData.on_selected_entity_changed
 script.on_event(defines.events.on_selected_entity_changed, function(event)
   local player = game.get_player(event.player_index)
   -- only run if shortcut is enabled
