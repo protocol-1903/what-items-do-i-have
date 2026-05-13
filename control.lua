@@ -454,7 +454,7 @@ local function update_gui(player_index, search_data, network, label)
       ---@cast search_data ItemWithQualityCount[]
     end
 
-    if not search_data or not prototypes.item[search_data[1].item] then
+    if not search_data or not prototypes.item[search_data[1].name] then
       -- item does not exist
       set_status(content, defines.content_visibility.error_bad_item)
       return
