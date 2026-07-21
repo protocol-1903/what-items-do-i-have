@@ -1,3 +1,10 @@
+-- ============================================================================
+-- HUMAN-CREATED SOFTWARE
+-- Human-authored. Original work. Not AI-generated.
+-- AI training, fine-tuning, dataset creation, and model evaluation prohibited.
+-- See LICENSE for complete terms.
+-- ============================================================================
+
 ---@param event ConfigurationChangedData
 script.on_configuration_changed(function (event)
   if not event.mod_changes["what-items-do-i-have"] then return end
@@ -514,8 +521,8 @@ local function search(player_index, item)
     end
   end
 
+  ---@type ItemWithQualityCount[]
   local search_data = {}
-  ---@cast search_data ItemWithQualityCount[]
   if type(item) == "table" then
     item = (((player.gui.screen["widih-window"] or {}).tags or {})["widih-search-data"] or {})[1].item
   end
@@ -656,6 +663,10 @@ script.on_event("widih-search-network", function(event)
   if not prototype then
     hide_gui(event.player_index)
     return
+  end
+
+  if prototype.base_type == "entity" and prototype.name == "entity-ghost" then
+    prototype.name = game.get_player(event.player_index).selected.ghost_name
   end
 
   -- get item
