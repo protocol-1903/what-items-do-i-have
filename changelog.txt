@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.2
+Date: 2026-08-14
+  Changes:
+    - Alt+clicking on a button opens the factoriopedia entry for that item, instead of putting that item in your cursor. Does not respect custom open factoriopedia hotkey. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/19
+---------------------------------------------------------------------------------------------------
 Version: 1.4.1
 Date: 2026-07-20
   Changes:

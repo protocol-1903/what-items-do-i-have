@@ -578,7 +578,9 @@ script.on_event(defines.events.on_gui_click, function (event)
     player.mod_settings["widih-invert-sort"] = {value = event.element.state}
   elseif event.element.name == "pin" then
     player.mod_settings["widih-thin-window"] = {value = not player.mod_settings["widih-thin-window"].value}
-  elseif event.element.type == "sprite-button" then
+  elseif event.element.type == "sprite-button" and event.alt then
+    player.open_factoriopedia_gui(prototypes.item[event.element.sprite:sub(6)])
+  elseif event.element.type == "sprite-button" and not event.alt then
     if player.clear_cursor() then
       player.cursor_ghost = {
         name = event.element.sprite:sub(6),
