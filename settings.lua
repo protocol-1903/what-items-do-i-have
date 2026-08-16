@@ -46,5 +46,11 @@ data:extend{
       "local-search",
       "remote-search"
     }
+  },
+  {
+    type = "bool-setting",
+    name = "widih-search-orbited-planet",
+    setting_type = "runtime-per-user",
+    default_value = false
   }
 }

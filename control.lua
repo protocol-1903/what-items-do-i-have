@@ -235,6 +235,13 @@ local function update_gui(player_index, search_data, network, label)
 
     window.settings.sub.add{
       type = "checkbox",
+      name = "search-orbited",
+      state = player.mod_settings["widih-search-orbited-planet"].value,
+      caption = {"mod-setting-name.widih-search-orbited-planet"}
+    }
+
+    window.settings.sub.add{
+      type = "checkbox",
       name = "invert-sort",
       state = player.mod_settings["widih-invert-sort"].value,
       caption = {"mod-setting-name.widih-invert-sort"}
@@ -503,21 +510,30 @@ local function search(player_index, item)
   local network, label
   local location = player.mod_settings["widih-show-surface"].value or false
 
+  local surface
   if not player.character or player.controller_type ~= defines.controllers.remote or player.mod_settings["widih-search-location"].value == "remote-search" then
-    if player.surface.platform then
-      network = player.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      label = location and {"widih-network.platform-r", get_location(player.surface)} or {"widih-network.platform"}
-    else
-      network = player.surface.find_closest_logistic_network_by_position(player.position, player.force)
-      label = location and {"widih-network.logistic-r", get_location(player.surface)} or {"widih-network.logistic"}
-    end
+    surface = player.surface
   elseif player.controller_type == defines.controllers.remote and player.mod_settings["widih-search-location"].value == "local-search" and player.character then
-    if player.character.surface.platform then
-      network = player.character.surface.platform.hub.get_inventory(defines.inventory.hub_main)
-      label = location and {"widih-network.platform-r", get_location(player.character.surface)} or {"widih-network.platform"}
+    surface = player.character.surface
+  end
+
+  if surface then
+    local platform = surface.platform
+    if platform then
+      surface = nil
+      if player.mod_settings["widih-search-orbited-planet"].value and platform.space_location then
+        local planet = game.planets[platform.space_location.name]
+        surface = planet and planet.surface
+        network = surface.find_closest_logistic_network_by_position(player.position, player.force)
+        label = location and {"widih-network.logistic-r", get_location(surface)} or {"widih-network.logistic"}
+      end
+      if not surface or not network then
+        network = platform.hub.get_inventory(defines.inventory.hub_main)
+        label = location and {"widih-network.platform-r", get_location(platform.surface)} or {"widih-network.platform"}
+      end
     else
-      network = player.character.surface.find_closest_logistic_network_by_position(player.character.position, player.force)
-      label = location and {"widih-network.logistic-r", get_location(player.character.surface)} or {"widih-network.logistic"}
+      network = surface.find_closest_logistic_network_by_position(player.position, player.force)
+      label = location and {"widih-network.logistic-r", get_location(surface)} or {"widih-network.logistic"}
     end
   end
 
@@ -576,6 +592,8 @@ script.on_event(defines.events.on_gui_click, function (event)
     player.mod_settings["widih-ignore-zero-count"] = {value = event.element.state}
   elseif event.element.name == "invert-sort" then
     player.mod_settings["widih-invert-sort"] = {value = event.element.state}
+  elseif event.element.name == "search-orbited" then
+    player.mod_settings["widih-search-orbited-planet"] = {value = event.element.state}
   elseif event.element.name == "pin" then
     player.mod_settings["widih-thin-window"] = {value = not player.mod_settings["widih-thin-window"].value}
   elseif event.element.type == "sprite-button" and event.alt then
