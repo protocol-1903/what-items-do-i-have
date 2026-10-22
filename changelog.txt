@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.4
 Date: ????
+  Changes:
+    - Changed both shorcuts/hotkeys to be mod settings, also appearing in the settings UI. Both are default off.
   Bugfixes:
     - Fixed a crash when a space platform is above a planet without a surface. Resolves https://github.com/protocol-1903/what-items-do-i-have/issues/20
+    - Fixed that the settings UI would not update when mod settings were adjusted
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.3
 Date: 2026-08-15

@@ -8,6 +8,18 @@
 data:extend{
   {
     type = "bool-setting",
+    name = "widih-update-hand",
+    setting_type = "runtime-per-user",
+    default_value = false,
+  },
+  {
+    type = "bool-setting",
+    name = "widih-update-hover",
+    setting_type = "runtime-per-user",
+    default_value = false,
+  },
+  {
+    type = "bool-setting",
     name = "widih-show-surface",
     setting_type = "runtime-per-user",
     default_value = true,
