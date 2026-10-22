@@ -524,8 +524,10 @@ local function search(player_index, item)
       if player.mod_settings["widih-search-orbited-planet"].value and platform.space_location then
         local planet = game.planets[platform.space_location.name]
         surface = planet and planet.surface
-        network = surface.find_closest_logistic_network_by_position(player.position, player.force)
-        label = location and {"widih-network.logistic-r", get_location(surface)} or {"widih-network.logistic"}
+        if surface then
+          network = surface.find_closest_logistic_network_by_position(player.position, player.force)
+          label = location and {"widih-network.logistic-r", get_location(surface)} or {"widih-network.logistic"}
+        end
       end
       if not surface or not network then
         network = platform.hub.get_inventory(defines.inventory.hub_main)
